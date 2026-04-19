@@ -1,0 +1,13 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Gui.ViewModels"
+        x:Class="Gui.Views.AboutWindow"
+        x:DataType="vm:AboutViewModel"
+        Title="About" Width="300" Height="200" WindowStartupLocation="CenterOwner">
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock Text="Lexer Text Editor" FontSize="20" FontWeight="Bold"/>
+        <TextBlock Text="Version 1.0"/>
+        <TextBlock Text="© 2025" Margin="0,20,0,0"/>
+        <Button Content="OK" Click="CloseClick" Width="80" Margin="0,20,0,0"/>
+    </StackPanel>
+</Window>

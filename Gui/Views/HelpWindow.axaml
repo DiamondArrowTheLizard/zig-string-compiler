@@ -1,0 +1,10 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Gui.ViewModels"
+        x:Class="Gui.Views.HelpWindow"
+        x:DataType="vm:HelpViewModel"
+        Title="Help" Width="500" Height="400" WindowStartupLocation="CenterOwner">
+    <ScrollViewer>
+        <TextBlock Text="{Binding HelpText}" TextWrapping="Wrap" Margin="10"/>
+    </ScrollViewer>
+</Window>

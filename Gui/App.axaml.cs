@@ -1,16 +1,18 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
+using Gui.Services;
 using Gui.ViewModels;
 using Gui.Views;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Gui;
 
 public partial class App : Application
 {
+    public IServiceProvider? ServiceProvider { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -18,14 +20,31 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var services = new ServiceCollection();
+        ConfigureServices(services);
+        ServiceProvider = services.BuildServiceProvider();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IFileService, FileService>();
+        services.AddSingleton<IDialogService, DialogService>();
+
+        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<HelpViewModel>();
+        services.AddTransient<AboutViewModel>();
+
+        services.AddTransient<MainWindow>(provider => new MainWindow
+        {
+            DataContext = provider.GetRequiredService<MainWindowViewModel>()
+        });
     }
 }
