@@ -61,7 +61,7 @@ public class ParserContext
                 Current.WordCurrent ?? "",
                 Current.Line,
                 Current.WordStart,
-                $"Unexpected token '{Current.WordCurrent}'. Expected one of: {string.Join(", ", expected)}"
+                $"Неизвестная Лексема '{Current.WordCurrent}'. Ожидалось: {string.Join(", ", expected)}"
             ));
             Advance();
         }

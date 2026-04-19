@@ -17,24 +17,24 @@ csv.Build(lexer);
 csv.WriteToStream(Console.Out);
 
 Console.WriteLine();
-Console.WriteLine("--- Parser Results ---");
+Console.WriteLine("--- Парсер ---");
 
 var parser = new Parser();
 var errors = parser.Parse(lexer.Nodes.ToList());
 
 if (errors.Count == 0)
 {
-    Console.WriteLine("Parsing succeeded. No syntax errors.");
+    Console.WriteLine("Без ошибок.");
 }
 else
 {
-    Console.WriteLine($"Found {errors.Count} syntax error(s):");
+    Console.WriteLine($"Найдено ошибок: {errors.Count}");
     Console.WriteLine();
-    Console.WriteLine($"{"Invalid Fragment",-20} {"Location",-15} Description");
+    Console.WriteLine($"{"Неверный фрагмент",-20} {"Местоположение",-15} Описание ошибки");
     Console.WriteLine(new string('-', 80));
     foreach (var err in errors)
     {
-        string location = $"Ln {err.Line}, Col {err.Column}";
+        string location = $"Строка {err.Line}, Нач {err.Column}";
         Console.WriteLine($"{err.InvalidFragment,-20} {location,-15} {err.Description}");
     }
 }

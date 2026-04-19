@@ -57,7 +57,7 @@ public class Parser
 
         if (state != State.Accept && !ctx.IsAtEnd)
         {
-            ctx.ReportError("Incomplete declaration.");
+            ctx.ReportError("Незаконченное объявление.");
         }
 
         return ctx.Errors;
