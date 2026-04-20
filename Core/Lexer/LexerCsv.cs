@@ -7,7 +7,7 @@ namespace Core.Lexer;
 
 public class LexerCsv
 {
-    private const string CsvFieldNames = "Code,Type,Value,Location";
+    private const string CsvFieldNames = "Условный Код,Тип Лексемы,Лексема,Местоположение";
     private List<string>? _content;
 
     public IReadOnlyList<string>? Content => _content;
