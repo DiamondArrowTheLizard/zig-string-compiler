@@ -69,6 +69,15 @@ public class ParserContext
         if (Current != null && expected.Contains(Current.TokenCurrent))
         {
             var missingChain = GetMissingChain(currentState);
+            if (!string.IsNullOrEmpty(missingChain))
+            {
+                _errors.Add(new ErrorInfo(
+                    missingChain,
+                    Current.Line,
+                    Current.WordStart,
+                    $"Вставлены пропущенные лексемы: '{missingChain}' для восстановления"
+                ));
+            }
         }
     }
 
