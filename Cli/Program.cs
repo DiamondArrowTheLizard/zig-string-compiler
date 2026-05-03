@@ -1,4 +1,5 @@
 ﻿using Core.Lexer;
+using Core.Parser;
 using System;
 using System.IO;
 using System.Linq;
@@ -14,3 +15,16 @@ while ((line = Console.ReadLine()) != null)
 var csv = new LexerCsv();
 csv.Build(lexer);
 csv.WriteToStream(Console.Out);
+
+Console.WriteLine();
+Console.WriteLine("--- Parser Results ---");
+
+
+var parser = new Parser();
+var result = parser.Parse(lexer.Nodes, lexer.Dictionary);
+
+var csvP = new ParserCsv();
+csvP.Build(result);
+using var writerP = new StringWriter();
+csvP.WriteToStream(writerP);
+Console.WriteLine(writerP.ToString());
