@@ -1,3 +1,6 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Gui.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -14,16 +17,28 @@ public class DialogService : IDialogService
         _serviceProvider = serviceProvider;
     }
 
+    private Window? GetMainWindow()
+    {
+        return (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+    }
+
     public Task ShowMessageAsync(string title, string message)
     {
+        var owner = GetMainWindow();
+        if (owner == null)
+            return Task.CompletedTask;
+
         var dialog = new ConfirmationDialog(title, $"{message}\n\nPress any button to close.");
-        return dialog.ShowDialog<bool>(_serviceProvider.GetRequiredService<MainWindow>());
+        return dialog.ShowDialog<bool>(owner);
     }
 
     public async Task<bool> ShowConfirmationAsync(string title, string message)
     {
+        var owner = GetMainWindow();
+        if (owner == null)
+            return false;
+
         var dialog = new ConfirmationDialog(title, message);
-        var result = await dialog.ShowDialog<bool>(_serviceProvider.GetRequiredService<MainWindow>());
-        return result;
+        return await dialog.ShowDialog<bool>(owner);
     }
 }
