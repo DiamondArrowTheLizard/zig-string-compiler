@@ -43,6 +43,8 @@ public partial class MainWindowViewModel : ObservableObject
 
     public TextDocument Document { get; } = new();
 
+    public Func<Task<bool>>? ConfirmDiscardRequested { get; set; }
+
     public MainWindowViewModel(IFileService fileService, IDialogService dialogService, IServiceProvider serviceProvider)
     {
         _fileService = fileService;
@@ -59,6 +61,14 @@ public partial class MainWindowViewModel : ObservableObject
     public void SetEditor(TextEditor editor)
     {
         _editor = editor;
+    }
+
+    public async Task<bool> ConfirmDiscardChanges()
+    {
+        if (!IsModified) return true;
+        if (ConfirmDiscardRequested != null)
+            return await ConfirmDiscardRequested();
+        return true; // fallback
     }
 
     [RelayCommand]
@@ -245,11 +255,4 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void ShowInfo(string title, string message) =>
         _ = _dialogService.ShowMessageAsync(title, message);
-
-    public async Task<bool> ConfirmDiscardChanges()
-    {
-        if (!IsModified) return true;
-        return await _dialogService.ShowConfirmationAsync("Unsaved Changes",
-            "You have unsaved changes. Do you want to discard them?");
-    }
 }

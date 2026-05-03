@@ -1,17 +1,21 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using AvaloniaEdit;
 using AvaloniaEdit.Editing;
 using Gui.Models;
 using Gui.ViewModels;
 using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Gui.Views;
 
 public partial class MainWindow : Window
 {
     private readonly TextEditor _editor;
+    private bool _userWantsToQuit;
 
     public MainWindow()
     {
@@ -36,24 +40,47 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void OnClosing(object? sender, WindowClosingEventArgs e)
+    private void OnClosing(object? sender, WindowClosingEventArgs e)
     {
-        if (DataContext is MainWindowViewModel vm)
+        if (!_userWantsToQuit)
         {
-            bool canClose = await vm.ConfirmDiscardChanges();
-            e.Cancel = !canClose;
+            e.Cancel = true;
+            Task.Run(() => ShowCloseConfirmation());
         }
+    }
+
+    private async Task ShowCloseConfirmation()
+    {
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            if (DataContext is MainWindowViewModel vm && vm.IsModified)
+            {
+                var dialog = new ConfirmationDialog("Unsaved Changes",
+                    "You have unsaved changes. Do you want to discard them?");
+                bool result = await dialog.ShowDialog<bool>(this);
+                if (result)
+                {
+                    _userWantsToQuit = true;
+                    Close();
+                }
+            }
+            else
+            {
+                _userWantsToQuit = true;
+                Close();
+            }
+        });
     }
 
     private void OnLexerNavigate(TokenInfo token)
     {
         try
         {
-            int line = (int)token.Line;                // 1-based
-            int startCol = (int)token.StartColumn;     // 0-based
-            int endCol = (int)token.EndColumn;         // 0-based (index of last char)
+            int line = (int)token.Line;
+            int startCol = (int)token.StartColumn;
+            int endCol = (int)token.EndColumn;
             int length = endCol - startCol + 1;
-            int col1 = startCol + 1;                   // convert to 1-based
+            int col1 = startCol + 1;
 
             int startOffset = _editor.Document.GetOffset(line, col1);
             int endOffset = startOffset + length;
@@ -66,8 +93,8 @@ public partial class MainWindow : Window
     {
         try
         {
-            int line = error.Line;                     // 1-based
-            int col = error.Column;                    // 1-based
+            int line = error.Line;
+            int col = error.Column;
             int length = error.Fragment?.Length ?? 0;
             if (line > 0 && col > 0 && length > 0)
             {

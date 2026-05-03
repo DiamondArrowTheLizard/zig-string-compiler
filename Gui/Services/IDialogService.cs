@@ -6,5 +6,4 @@ public interface IDialogService
 {
     Task ShowMessageAsync(string title, string message);
     Task<bool> ShowConfirmationAsync(string title, string message);
-    Task<string?> ShowInputAsync(string title, string message);
 }
