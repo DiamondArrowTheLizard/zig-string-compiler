@@ -44,7 +44,7 @@ public class Lexer
             return Token.Const;
         }
 
-        if (token == Token.Unknown && IsIdentifier(word))
+        if (token == Token.Unknown)
         {
             if (_expectId)
             {
@@ -63,20 +63,6 @@ public class Lexer
         return token;
     }
 
-    private static bool IsIdentifier(string word)
-    {
-        if (string.IsNullOrEmpty(word))
-            return false;
-        if (!char.IsLetter(word[0]) && word[0] != '_')
-            return false;
-        for (int i = 1; i < word.Length; i++)
-        {
-            if (!char.IsLetterOrDigit(word[i]) && word[i] != '_')
-                return false;
-        }
-        return true;
-    }
-
     private void AddToken(uint line, uint start, uint end, string lexeme, Token type)
     {
         var node = new LexerNode
@@ -86,7 +72,7 @@ public class Lexer
             WordEnd = end,
             WordCurrent = lexeme,
             TokenCurrent = type,
-            TokenDesc = _dictionary.GetDescription(type) ?? "Неизвестный токен"
+            TokenDesc = _dictionary.GetDescription(type) ?? "UNKNOWN"
         };
 
         if (_nodes.Count > 0)
@@ -174,21 +160,20 @@ public class Lexer
                 }
                 default:
                 {
-                    if (char.IsLetter(ch) || ch == '_')
+                    int start = index;
+                    while (index < len && !char.IsWhiteSpace(line[index])
+                        && line[index] != ':'
+                        && line[index] != '['
+                        && line[index] != ']'
+                        && line[index] != '='
+                        && line[index] != ';'
+                        && line[index] != '"')
                     {
-                        int start = index;
-                        while (index < len && (char.IsLetterOrDigit(line[index]) || line[index] == '_'))
-                            index++;
-                        string word = line.Substring(start, index - start);
-                        Token tok = ParseToToken(word);
-                        AddToken(CurrentLine, (uint)start, (uint)(index - 1), word, tok);
-                    }
-                    else
-                    {
-                        string unknown = ch.ToString();
-                        AddToken(CurrentLine, (uint)index, (uint)index, unknown, Token.Unknown);
                         index++;
                     }
+                    string word = line.Substring(start, index - start);
+                    Token tok = ParseToToken(word);
+                    AddToken(CurrentLine, (uint)start, (uint)(index - 1), word, tok);
                     break;
                 }
             }
