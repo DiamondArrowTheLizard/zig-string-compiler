@@ -7,7 +7,6 @@ using AvaloniaEdit.Editing;
 using Gui.Models;
 using Gui.ViewModels;
 using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Gui.Views;
@@ -21,14 +20,17 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _editor = this.FindControl<TextEditor>("Editor")!;
+        DataContextChanged += OnDataContextChanged;
+        _editor.TextArea.Caret.PositionChanged += OnCaretChanged;
+        Closing += OnClosing;
+    }
 
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
         if (DataContext is MainWindowViewModel vm)
         {
             vm.SetEditor(_editor);
         }
-        _editor.TextArea.Caret.PositionChanged += OnCaretChanged;
-
-        Closing += OnClosing;
     }
 
     private void OnCaretChanged(object? sender, EventArgs e)
@@ -73,7 +75,7 @@ public partial class MainWindow : Window
                         Close();
                         break;
                     case SaveBeforeCloseResult.Cancel:
-                        // do nothing
+                        // остаёмся в приложении
                         break;
                 }
             }
