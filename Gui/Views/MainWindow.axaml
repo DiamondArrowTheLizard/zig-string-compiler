@@ -121,18 +121,17 @@
             <!-- Results area -->
             <Grid Grid.Row="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Text="Lexer Results" Margin="5" FontWeight="Bold"/>
 <dg:DataGrid Grid.Row="1" ItemsSource="{Binding Tokens}" SelectedItem="{Binding SelectedToken}"
              AutoGenerateColumns="False" IsReadOnly="True">
     <dg:DataGrid.Columns>
-        <dg:DataGridTextColumn Header="Line" Binding="{Binding Line}" Width="50"/>
-        <dg:DataGridTextColumn Header="Start" Binding="{Binding StartColumn}" Width="50"/>
-        <dg:DataGridTextColumn Header="End" Binding="{Binding EndColumn}" Width="50"/>
+        <dg:DataGridTextColumn Header="Line" Binding="{Binding Line}" Width="350"/>
+        <dg:DataGridTextColumn Header="Start" Binding="{Binding StartColumn}" Width="350"/>
+        <dg:DataGridTextColumn Header="End" Binding="{Binding EndColumn}" Width="350"/>
         
-        <dg:DataGridTemplateColumn Header="Type" Width="120">
+        <dg:DataGridTemplateColumn Header="Type" Width="500">
             <dg:DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Description}" 
