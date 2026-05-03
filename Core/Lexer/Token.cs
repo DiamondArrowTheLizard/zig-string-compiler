@@ -2,6 +2,7 @@ namespace Core.Lexer;
 
 public enum Token
 {
+    UnknownNoConst = -1,
     Unknown = 0,
     Const = 1,
     Space = 2,
@@ -13,5 +14,5 @@ public enum Token
     Equals = 8,
     Quote = 9,
     Content = 10,
-    Semicolon = 11
+    Semicolon = 11,
 }

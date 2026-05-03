@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Core.Lexer;
 
@@ -9,6 +8,10 @@ public class Lexer
     private readonly List<LexerNode> _nodes = new();
     private readonly LexerFlags _flags = new();
     private readonly TokenDictionary _dictionary = new();
+
+    private bool _declarationStarted = false;
+    private bool _expectId = false;
+    private bool _anyTokenSeen = false;
 
     public IReadOnlyList<LexerNode> Nodes => _nodes;
     public TokenDictionary Dictionary => _dictionary;
@@ -31,20 +34,47 @@ public class Lexer
             return Token.Quote;
         }
 
-        if (token == Token.Const && !_flags.FirstConst)
+        if (token == Token.Const)
         {
-            _flags.FirstConst = true;
+            if (!_declarationStarted)
+            {
+                _declarationStarted = true;
+                _expectId = true;
+            }
             return Token.Const;
         }
 
-        if (token == Token.Unknown && _flags.FirstConst && !_flags.IdParsed)
+        if (token == Token.Unknown && IsIdentifier(word))
         {
-            _flags.IdParsed = true;
-            _dictionary.Insert(Token.Id, word, "Идентификатор");
-            return Token.Id;
+            if (_expectId)
+            {
+                _expectId = false;
+                if (!_dictionary.GetKey(word).Equals(Token.Id))
+                    _dictionary.Insert(Token.Id, word, "Идентификатор");
+                return Token.Id;
+            }
+
+            if (!_anyTokenSeen && !_declarationStarted)
+                return Token.UnknownNoConst;
+
+            return Token.Unknown;
         }
 
         return token;
+    }
+
+    private static bool IsIdentifier(string word)
+    {
+        if (string.IsNullOrEmpty(word))
+            return false;
+        if (!char.IsLetter(word[0]) && word[0] != '_')
+            return false;
+        for (int i = 1; i < word.Length; i++)
+        {
+            if (!char.IsLetterOrDigit(word[i]) && word[i] != '_')
+                return false;
+        }
+        return true;
     }
 
     private void AddToken(uint line, uint start, uint end, string lexeme, Token type)
@@ -56,7 +86,7 @@ public class Lexer
             WordEnd = end,
             WordCurrent = lexeme,
             TokenCurrent = type,
-            TokenDesc = _dictionary.GetDescription(type) ?? "UNKNOWN"
+            TokenDesc = _dictionary.GetDescription(type) ?? "Неизвестный токен"
         };
 
         if (_nodes.Count > 0)
@@ -68,6 +98,9 @@ public class Lexer
         }
 
         _nodes.Add(node);
+
+        if (type != Token.Space)
+            _anyTokenSeen = true;
     }
 
     public void ParseLine(string line)
@@ -110,6 +143,8 @@ public class Lexer
                     _flags.FirstConst = false;
                     _flags.IdParsed = false;
                     _flags.InsideQuotes = false;
+                    _declarationStarted = false;
+                    _expectId = false;
                     break;
                 case '"':
                 {

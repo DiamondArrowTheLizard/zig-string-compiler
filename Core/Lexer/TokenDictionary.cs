@@ -9,15 +9,16 @@ public class TokenDictionary
 
     public TokenDictionary()
     {
-        Insert(Token.Const, "const", "Ключевое слово");
+        Insert(Token.Const, "const", "Ключевое слово const");
         Insert(Token.Space, " ", "(Пробел)");
         Insert(Token.Colon, ":", "Оператор-двоеточие");
         Insert(Token.BracesOpen, "[", "Оператор-начало массива");
         Insert(Token.BracesClose, "]", "Оператор-конец массива");
-        Insert(Token.U8, "u8", "Ключевое слово");
+        Insert(Token.U8, "u8", "Ключевое слово u8");
         Insert(Token.Equals, "=", "Оператор присваивания");
         Insert(Token.Quote, "\"", "Кавычки");
         Insert(Token.Semicolon, ";", "Конец оператора");
+        Insert(Token.UnknownNoConst, "", "Пропущено ключевое слово const");
     }
 
     public void Insert(Token key, string value, string description)
