@@ -55,13 +55,26 @@ public partial class MainWindow : Window
         {
             if (DataContext is MainWindowViewModel vm && vm.IsModified)
             {
-                var dialog = new ConfirmationDialog("Unsaved Changes",
-                    "You have unsaved changes. Do you want to discard them?");
-                bool result = await dialog.ShowDialog<bool>(this);
-                if (result)
+                var dialog = new SaveBeforeCloseDialog();
+                var result = await dialog.ShowDialog<SaveBeforeCloseResult>(this);
+
+                switch (result)
                 {
-                    _userWantsToQuit = true;
-                    Close();
+                    case SaveBeforeCloseResult.Save:
+                        bool saved = await vm.SaveChangesAsync();
+                        if (saved)
+                        {
+                            _userWantsToQuit = true;
+                            Close();
+                        }
+                        break;
+                    case SaveBeforeCloseResult.Discard:
+                        _userWantsToQuit = true;
+                        Close();
+                        break;
+                    case SaveBeforeCloseResult.Cancel:
+                        // do nothing
+                        break;
                 }
             }
             else

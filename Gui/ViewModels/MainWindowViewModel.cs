@@ -71,6 +71,22 @@ public partial class MainWindowViewModel : ObservableObject
         return true; // fallback
     }
 
+
+    public async Task<bool> SaveChangesAsync()
+    {
+        if (await _fileService.SaveFileAsync(CurrentFilePath, Document.Text))
+        {
+            IsModified = false;
+            StatusText = "File saved";
+            return true;
+        }
+        else
+        {
+            await _dialogService.ShowMessageAsync("Error", "Could not save file.");
+            return false;
+        }
+    }
+
     [RelayCommand]
     private async Task NewFile()
     {
@@ -102,15 +118,7 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveFile()
     {
-        if (await _fileService.SaveFileAsync(CurrentFilePath, Document.Text))
-        {
-            IsModified = false;
-            StatusText = "File saved";
-        }
-        else
-        {
-            await _dialogService.ShowMessageAsync("Error", "Could not save file.");
-        }
+        await SaveChangesAsync();
     }
 
     [RelayCommand]
