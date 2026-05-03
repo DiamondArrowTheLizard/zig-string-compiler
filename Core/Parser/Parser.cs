@@ -20,8 +20,7 @@ public class Parser
         AfterEquals,
         AfterOpenQuote,
         AfterContent,
-        AfterCloseQuote,
-        Done
+        AfterCloseQuote
     }
 
     private static readonly Dictionary<State, HashSet<Token>> ExpectedTokens = new()
@@ -37,8 +36,7 @@ public class Parser
         [State.AfterEquals] = new() { Token.Quote },
         [State.AfterOpenQuote] = new() { Token.Content, Token.Quote },
         [State.AfterContent] = new() { Token.Quote },
-        [State.AfterCloseQuote] = new() { Token.Semicolon },
-        [State.Done] = new() { }
+        [State.AfterCloseQuote] = new() { Token.Semicolon }
     };
 
     private static readonly Dictionary<State, Dictionary<Token, State>> Transitions = new()
@@ -57,7 +55,7 @@ public class Parser
         [State.AfterU8] = new()
         {
             [Token.Equals] = State.AfterEquals,
-            [Token.Semicolon] = State.Done
+            [Token.Semicolon] = State.Start
         },
         [State.AfterEquals] = new() { [Token.Quote] = State.AfterOpenQuote },
         [State.AfterOpenQuote] = new()
@@ -66,8 +64,7 @@ public class Parser
             [Token.Quote] = State.AfterCloseQuote
         },
         [State.AfterContent] = new() { [Token.Quote] = State.AfterCloseQuote },
-        [State.AfterCloseQuote] = new() { [Token.Semicolon] = State.Done },
-        [State.Done] = new() { }
+        [State.AfterCloseQuote] = new() { [Token.Semicolon] = State.Start }
     };
 
     private static readonly HashSet<Token> SynchronizingTokens = new()
@@ -86,18 +83,6 @@ public class Parser
         while (index < significant.Count)
         {
             var token = significant[index];
-
-            if (state == State.Done)
-            {
-                errors.Add(new ParserError
-                {
-                    Fragment = GetTokenText(token),
-                    Location = FormatLocation(token),
-                    Description = "Лишний токен после завершения объявления"
-                });
-                index++;
-                continue;
-            }
 
             var expectedSet = ExpectedTokens[state];
             if (expectedSet.Contains(token.TokenCurrent))
@@ -147,22 +132,40 @@ public class Parser
             }
         }
 
-        while (state != State.Done)
+        while (state != State.Start)
         {
             var missingSet = ExpectedTokens[state];
-            string desc = string.Join(" или ", missingSet.Select(t =>
-                $"\"{dictionary.GetDescription(t) ?? t.ToString()}\""));
-            string location = significant.Count > 0
-                ? $"строка {significant[^1].Line}, позиция {significant[^1].WordEnd + 2}"
-                : "строка 1, позиция 1";
-
-            errors.Add(new ParserError
+            if (missingSet.Contains(Token.Semicolon))
             {
-                Fragment = string.Empty,
-                Location = location,
-                Description = $"Ожидался токен {desc} в конце объявления"
-            });
-            state = SkipToNextState(state);
+                string desc = dictionary.GetDescription(Token.Semicolon) ?? ";";
+                string location = significant.Count > 0
+                    ? $"строка {significant[^1].Line}, позиция {significant[^1].WordEnd + 2}"
+                    : "строка 1, позиция 1";
+
+                errors.Add(new ParserError
+                {
+                    Fragment = string.Empty,
+                    Location = location,
+                    Description = $"Ожидался токен \"{desc}\" в конце объявления"
+                });
+                state = Transitions[state][Token.Semicolon];
+            }
+            else
+            {
+                var firstExpected = missingSet.First();
+                string desc = dictionary.GetDescription(firstExpected) ?? firstExpected.ToString();
+                string location = significant.Count > 0
+                    ? $"строка {significant[^1].Line}, позиция {significant[^1].WordEnd + 2}"
+                    : "строка 1, позиция 1";
+
+                errors.Add(new ParserError
+                {
+                    Fragment = string.Empty,
+                    Location = location,
+                    Description = $"Ожидался токен \"{desc}\" в конце объявления"
+                });
+                state = Transitions[state][firstExpected];
+            }
         }
 
         return new ParseResult
@@ -208,13 +211,6 @@ public class Parser
             }
         }
         return null;
-    }
-
-    private static State SkipToNextState(State state)
-    {
-        if (state == State.Done) return State.Done;
-        var firstExpected = ExpectedTokens[state].First();
-        return Transitions[state][firstExpected];
     }
 
     private static string FormatLocation(LexerNode token)
