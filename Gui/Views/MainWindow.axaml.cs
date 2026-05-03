@@ -1,9 +1,12 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using AvaloniaEdit;
 using AvaloniaEdit.Editing;
+using Gui.Models;
 using Gui.ViewModels;
 using System;
+using System.Threading.Tasks;
 
 namespace Gui.Views;
 
@@ -19,36 +22,58 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm)
         {
             vm.SetEditor(_editor);
-            vm.TokenSelected += OnTokenSelected;
         }
+        _editor.TextArea.Caret.PositionChanged += OnCaretChanged;
 
-        _editor.TextArea.Caret.PositionChanged += (s, e) =>
-        {
-            if (DataContext is MainWindowViewModel v)
-            {
-                var caret = _editor.TextArea.Caret;
-                v.StatusText = $"Ln {caret.Line}, Col {caret.Column}";
-            }
-        };
+        Closing += OnClosing;
     }
 
-    private void OnTokenSelected(Models.TokenInfo token)
+    private void OnCaretChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+        {
+            var caret = _editor.TextArea.Caret;
+            vm.StatusText = $"Ln {caret.Line}, Col {caret.Column}";
+        }
+    }
+
+    private async void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+        {
+            bool canClose = await vm.ConfirmDiscardChanges();
+            e.Cancel = !canClose;
+        }
+    }
+
+    private void OnLexerNavigate(TokenInfo token)
+    {
+        NavigateToPosition((int)token.Line, (int)token.StartColumn, (int)token.EndColumn);
+    }
+
+    private void OnParserNavigate(ParserErrorInfo error)
+    {
+        if (error.Line > 0 && error.Column > 0)
+        {
+            int endColumn = Math.Min(error.Column + (error.Fragment?.Length ?? 1) - 1, 1000);
+            NavigateToPosition(error.Line, error.Column, endColumn);
+        }
+    }
+
+    private void NavigateToPosition(int line, int startColumn, int endColumn)
     {
         try
         {
-            var line = (int)token.Line;
-            var column = (int)token.StartColumn;
-            var endColumn = (int)token.EndColumn;
-            var startOffset = _editor.Document.GetOffset(line, column);
-            var endOffset = _editor.Document.GetOffset(line, endColumn);
+            int lineIdx = Math.Max(1, line);
+            int colIdx = Math.Max(1, startColumn);
+            int endColIdx = Math.Max(1, endColumn);
+            int startOffset = _editor.Document.GetOffset(lineIdx, colIdx);
+            int endOffset = _editor.Document.GetOffset(lineIdx, endColIdx);
             _editor.CaretOffset = startOffset;
             _editor.TextArea.Selection = Selection.Create(_editor.TextArea, startOffset, endOffset);
             _editor.Focus();
         }
-        catch (ArgumentOutOfRangeException)
-        {
-
-        }
+        catch (ArgumentOutOfRangeException) { }
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

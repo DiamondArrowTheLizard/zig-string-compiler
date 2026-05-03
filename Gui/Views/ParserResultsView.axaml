@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Gui.ViewModels"
+             xmlns:conv="clr-namespace:Gui.Converters"
+             x:Class="Gui.Views.ParserResultsView"
+             x:DataType="vm:ParserResultsViewModel">
+
+    <UserControl.Resources>
+        <conv:TokenTypeToBrushConverter x:Key="TokenColorConverter"/>
+    </UserControl.Resources>
+
+    <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
+              AutoGenerateColumns="False" IsReadOnly="True"
+              DoubleTapped="OnDoubleTapped">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Fragment" Binding="{Binding Fragment}" Width="350"/>
+            <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="350"/>
+            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Gui.ViewModels"
+             xmlns:conv="clr-namespace:Gui.Converters"
+             x:Class="Gui.Views.LexerResultsView"
+             x:DataType="vm:LexerResultsViewModel">
+
+    <UserControl.Resources>
+        <conv:TokenTypeToBrushConverter x:Key="TokenColorConverter"/>
+    </UserControl.Resources>
+
+    <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
+              AutoGenerateColumns="False" IsReadOnly="True"
+              DoubleTapped="OnDoubleTapped">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Line" Binding="{Binding Line}" Width="350"/>
+            <DataGridTextColumn Header="Start" Binding="{Binding StartColumn}" Width="350"/>
+            <DataGridTextColumn Header="End" Binding="{Binding EndColumn}" Width="350"/>
+            <DataGridTemplateColumn Header="Type" Width="*">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Description}" 
+                                   Foreground="{Binding Type, Converter={StaticResource TokenColorConverter}}"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="350"/>
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

@@ -41,6 +41,8 @@ public partial class App : Application
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<HelpViewModel>();
         services.AddTransient<AboutViewModel>();
+        services.AddTransient<ParserResultsViewModel>();
+        services.AddTransient<LexerResultsViewModel>();
 
         services.AddTransient<MainWindow>(provider => new MainWindow
         {

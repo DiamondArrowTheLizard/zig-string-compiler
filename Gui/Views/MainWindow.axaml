@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Gui.ViewModels"
+        xmlns:views="clr-namespace:Gui.Views"
         xmlns:conv="clr-namespace:Gui.Converters"
         xmlns:avalonedit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
@@ -20,7 +21,7 @@
         </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto,Auto,*,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
         <!-- Menu -->
         <Menu Grid.Row="0">
             <MenuItem Header="_File">
@@ -58,7 +59,7 @@
             </MenuItem>
         </Menu>
 
-        <!-- Toolbar (using simple StackPanel if ToolBar is problematic) -->
+        <!-- Toolbar -->
         <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,0,0,1" Padding="2">
             <StackPanel Orientation="Horizontal" Spacing="2">
                 <Button Command="{Binding NewFileCommand}" ToolTip.Tip="New">
@@ -100,8 +101,8 @@
             </StackPanel>
         </Border>
 
-        <!-- Editor area with splitter -->
-        <Grid Grid.Row="2">
+        <!-- Editor and results with splitter -->
+<Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="4"/>
@@ -118,36 +119,20 @@
 
             <GridSplitter Grid.Row="1" Height="4" Background="Gray" HorizontalAlignment="Stretch"/>
 
-            <!-- Results area -->
-            <Grid Grid.Row="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="Lexer Results" Margin="5" FontWeight="Bold"/>
-<dg:DataGrid Grid.Row="1" ItemsSource="{Binding Tokens}" SelectedItem="{Binding SelectedToken}"
-             AutoGenerateColumns="False" IsReadOnly="True">
-    <dg:DataGrid.Columns>
-        <dg:DataGridTextColumn Header="Line" Binding="{Binding Line}" Width="350"/>
-        <dg:DataGridTextColumn Header="Start" Binding="{Binding StartColumn}" Width="350"/>
-        <dg:DataGridTextColumn Header="End" Binding="{Binding EndColumn}" Width="350"/>
-        
-        <dg:DataGridTemplateColumn Header="Type" Width="500">
-            <dg:DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Description}" 
-                               Foreground="{Binding Type, Converter={StaticResource TokenColorConverter}}"/>
-                </DataTemplate>
-            </dg:DataGridTemplateColumn.CellTemplate>
-        </dg:DataGridTemplateColumn>
-        
-        <dg:DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
-    </dg:DataGrid.Columns>
-</dg:DataGrid>
-            </Grid>
+            <TabControl Grid.Row="2">
+                <TabItem Header="Lexer">
+                    <views:LexerResultsView DataContext="{Binding LexerResults}"
+                                            NavigateTo="OnLexerNavigate"/>
+                </TabItem>
+                <TabItem Header="Parser">
+                    <views:ParserResultsView DataContext="{Binding ParserResults}"
+                                             NavigateTo="OnParserNavigate"/>
+                </TabItem>
+            </TabControl>
         </Grid>
 
         <!-- Status bar -->
-        <Border Grid.Row="4" BorderBrush="Gray" BorderThickness="0,1,0,0">
+        <Border Grid.Row="3" BorderBrush="Gray" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding StatusText}" Classes="status"/>
                 <TextBlock Text="{Binding EditorText.Length, StringFormat='Length: {0}'}" Classes="status"/>

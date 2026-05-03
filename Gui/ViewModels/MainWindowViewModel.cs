@@ -4,6 +4,7 @@ using AvaloniaEdit.Document;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Core.Lexer;
+using Core.Parser;
 using Gui.Models;
 using Gui.Services;
 using Gui.Views;
@@ -33,10 +34,9 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _isModified;
 
     [ObservableProperty]
-    private ObservableCollection<TokenInfo> _tokens = new();
-
+    private LexerResultsViewModel _lexerResults = new();
     [ObservableProperty]
-    private TokenInfo? _selectedToken;
+    private ParserResultsViewModel _parserResults = new();
 
     [ObservableProperty]
     private string _statusText = "Ready";
@@ -61,16 +61,6 @@ public partial class MainWindowViewModel : ObservableObject
         _editor = editor;
     }
 
-    partial void OnSelectedTokenChanged(TokenInfo? value)
-    {
-        if (value != null)
-        {
-            TokenSelected?.Invoke(value);
-        }
-    }
-
-    public event Action<TokenInfo>? TokenSelected;
-
     [RelayCommand]
     private async Task NewFile()
     {
@@ -78,7 +68,8 @@ public partial class MainWindowViewModel : ObservableObject
         Document.Text = string.Empty;
         CurrentFilePath = string.Empty;
         IsModified = false;
-        Tokens.Clear();
+        LexerResults.Items.Clear();
+        ParserResults.Items.Clear();
         StatusText = "New file created";
     }
 
@@ -92,7 +83,8 @@ public partial class MainWindowViewModel : ObservableObject
             Document.Text = content;
             CurrentFilePath = string.Empty;
             IsModified = false;
-            Tokens.Clear();
+            LexerResults.Items.Clear();
+            ParserResults.Items.Clear();
             StatusText = "File opened";
         }
     }
@@ -176,7 +168,9 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void RunParser()
     {
-        Tokens.Clear();
+        LexerResults.Items.Clear();
+        ParserResults.Items.Clear();
+
         var lexer = new Lexer();
         using var reader = new StringReader(Document.Text);
         string? line;
@@ -185,19 +179,32 @@ public partial class MainWindowViewModel : ObservableObject
             lexer.ParseLine(line);
         }
 
-        foreach (var node in lexer.Nodes)
+        var allTokens = lexer.Nodes.Select(n => new TokenInfo(
+            n.TokenCurrent,
+            n.TokenDesc ?? "UNKNOWN",
+            n.WordCurrent ?? "",
+            n.Line,
+            n.WordStart,
+            n.WordEnd
+        )).ToList();
+
+        var errorTokens = allTokens.Where(t =>
+            t.Type == Core.Lexer.Token.Unknown ||
+            t.Type == Core.Lexer.Token.UnknownNoConst).ToList();
+
+        foreach (var token in (errorTokens.Any() ? errorTokens : allTokens))
         {
-            Tokens.Add(new TokenInfo(
-                node.TokenCurrent,
-                node.TokenDesc ?? "UNKNOWN",
-                node.WordCurrent ?? "",
-                node.Line,
-                node.WordStart,
-                node.WordEnd
-            ));
+            LexerResults.Items.Add(token);
         }
 
-        StatusText = $"Parsed {Tokens.Count} tokens.";
+        var parser = new Parser();
+        var result = parser.Parse(lexer.Nodes, lexer.Dictionary);
+        foreach (var error in result.Errors)
+        {
+            ParserResults.Items.Add(new ParserErrorInfo(error.Fragment, error.Location, error.Description));
+        }
+
+        StatusText = $"Tokens: {allTokens.Count}, errors: {errorTokens.Count}, parser errors: {ParserResults.Items.Count}";
     }
 
     [RelayCommand]
@@ -239,7 +246,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void ShowInfo(string title, string message) =>
         _ = _dialogService.ShowMessageAsync(title, message);
 
-    private async Task<bool> ConfirmDiscardChanges()
+    public async Task<bool> ConfirmDiscardChanges()
     {
         if (!IsModified) return true;
         return await _dialogService.ShowConfirmationAsync("Unsaved Changes",
