@@ -131,6 +131,7 @@ public class Lexer
                     _flags.InsideQuotes = false;
                     _declarationStarted = false;
                     _expectId = false;
+                    _anyTokenSeen = false;
                     break;
                 case '"':
                 {
