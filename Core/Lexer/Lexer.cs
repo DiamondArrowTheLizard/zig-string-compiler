@@ -44,7 +44,7 @@ public class Lexer
             return Token.Const;
         }
 
-        if (token == Token.Unknown)
+        if (token == Token.Unknown && IsIdentifier(word))
         {
             if (_expectId)
             {
@@ -55,12 +55,29 @@ public class Lexer
             }
 
             if (!_anyTokenSeen && !_declarationStarted)
+            {
+                _expectId = true;
                 return Token.UnknownNoConst;
+            }
 
             return Token.Unknown;
         }
 
         return token;
+    }
+
+    private static bool IsIdentifier(string word)
+    {
+        if (string.IsNullOrEmpty(word))
+            return false;
+        if (!char.IsLetter(word[0]) && word[0] != '_')
+            return false;
+        for (int i = 1; i < word.Length; i++)
+        {
+            if (!char.IsLetterOrDigit(word[i]) && word[i] != '_')
+                return false;
+        }
+        return true;
     }
 
     private void AddToken(uint line, uint start, uint end, string lexeme, Token type)

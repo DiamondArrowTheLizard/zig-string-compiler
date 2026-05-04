@@ -79,32 +79,60 @@ public class Parser
 
         int index = 0;
         State state = State.Start;
+        string? lastExpectedDescription = null;
 
         while (index < significant.Count)
         {
             var token = significant[index];
+
+            if (state == State.Start && token.TokenCurrent == Token.UnknownNoConst)
+            {
+                errors.Add(new ParserError
+                {
+                    Fragment = GetTokenText(token),
+                    Location = FormatLocation(token),
+                    Description = "Ожидался токен \"Ключевое слово const\""
+                });
+                state = State.AfterId;   // считаем этот токен идентификатором
+                index++;
+                lastExpectedDescription = null;
+                continue;
+            }
+
+            // В состоянии AfterId пропускаем лишние идентификаторы без ошибок
+            if (state == State.AfterId && (token.TokenCurrent == Token.Id || token.TokenCurrent == Token.UnknownNoConst))
+            {
+                index++;
+                continue;
+            }
 
             var expectedSet = ExpectedTokens[state];
             if (expectedSet.Contains(token.TokenCurrent))
             {
                 state = Transitions[state][token.TokenCurrent];
                 index++;
+                lastExpectedDescription = null;
                 continue;
             }
 
-            var recovery = FindRecoveryPath(state, token.TokenCurrent, dictionary);
-            if (recovery != null)
+            string? insertedDescription = TryInsertSingleToken(state, token.TokenCurrent, dictionary);
+            if (insertedDescription != null)
             {
-                foreach (var inserted in recovery.InsertedTokens)
+                if (insertedDescription != lastExpectedDescription)
                 {
                     errors.Add(new ParserError
                     {
                         Fragment = GetTokenText(token),
                         Location = FormatLocation(token),
-                        Description = $"Ожидался токен \"{inserted}\""
+                        Description = $"Ожидался токен \"{insertedDescription}\""
                     });
+                    lastExpectedDescription = insertedDescription;
                 }
-                state = recovery.TargetState;
+                Token insertedToken = GetTokenByDescription(insertedDescription, dictionary);
+                if (Transitions[state].ContainsKey(insertedToken))
+                {
+                    state = Transitions[state][insertedToken];
+                }
                 continue;
             }
 
@@ -118,7 +146,7 @@ public class Parser
                 Location = FormatLocation(token),
                 Description = $"Неожиданный токен \"{tokenDesc}\", ожидался {expectedDesc}"
             });
-
+            lastExpectedDescription = dictionary.GetDescription(expectedSet.First()) ?? expectedSet.First().ToString();
             index++;
             while (index < significant.Count)
             {
@@ -126,7 +154,7 @@ public class Parser
                 if (SynchronizingTokens.Contains(next.TokenCurrent))
                     break;
                 if (ExpectedTokens[state].Contains(next.TokenCurrent) ||
-                    FindRecoveryPath(state, next.TokenCurrent, dictionary) != null)
+                    TryInsertSingleToken(state, next.TokenCurrent, dictionary) != null)
                     break;
                 index++;
             }
@@ -141,7 +169,6 @@ public class Parser
                 string location = significant.Count > 0
                     ? $"строка {significant[^1].Line}, позиция {significant[^1].WordEnd + 2}"
                     : "строка 1, позиция 1";
-
                 errors.Add(new ParserError
                 {
                     Fragment = string.Empty,
@@ -157,7 +184,6 @@ public class Parser
                 string location = significant.Count > 0
                     ? $"строка {significant[^1].Line}, позиция {significant[^1].WordEnd + 2}"
                     : "строка 1, позиция 1";
-
                 errors.Add(new ParserError
                 {
                     Fragment = string.Empty,
@@ -175,42 +201,32 @@ public class Parser
         };
     }
 
-    private static RecoveryInfo? FindRecoveryPath(State fromState, Token targetToken, TokenDictionary dictionary)
+    private static string? TryInsertSingleToken(State state, Token actualToken, TokenDictionary dictionary)
     {
-        var queue = new Queue<(State state, List<string> inserted)>();
-        var visited = new HashSet<State>();
-        queue.Enqueue((fromState, new List<string>()));
-        visited.Add(fromState);
-
-        while (queue.Count > 0)
+        foreach (var expectedTok in ExpectedTokens[state])
         {
-            var (current, inserted) = queue.Dequeue();
-            if (ExpectedTokens[current].Contains(targetToken))
+            if (expectedTok == actualToken)
+                return null;
+            if (Transitions[state].ContainsKey(expectedTok))
             {
-                return new RecoveryInfo
+                var nextState = Transitions[state][expectedTok];
+                if (ExpectedTokens[nextState].Contains(actualToken))
                 {
-                    TargetState = current,
-                    InsertedTokens = inserted
-                };
-            }
-
-            foreach (var expectedTok in ExpectedTokens[current])
-            {
-                if (Transitions[current].TryGetValue(expectedTok, out var next))
-                {
-                    if (!visited.Contains(next))
-                    {
-                        visited.Add(next);
-                        var newInserted = new List<string>(inserted)
-                        {
-                            dictionary.GetDescription(expectedTok) ?? expectedTok.ToString()
-                        };
-                        queue.Enqueue((next, newInserted));
-                    }
+                    return dictionary.GetDescription(expectedTok) ?? expectedTok.ToString();
                 }
             }
         }
         return null;
+    }
+
+    private static Token GetTokenByDescription(string description, TokenDictionary dictionary)
+    {
+        foreach (Token tok in Enum.GetValues(typeof(Token)))
+        {
+            if (dictionary.GetDescription(tok) == description)
+                return tok;
+        }
+        return Token.Unknown;
     }
 
     private static string FormatLocation(LexerNode token)
@@ -226,11 +242,5 @@ public class Parser
     private static string GetTokenDescription(LexerNode token, TokenDictionary dictionary)
     {
         return dictionary.GetDescription(token.TokenCurrent) ?? token.TokenCurrent.ToString();
-    }
-
-    private class RecoveryInfo
-    {
-        public State TargetState { get; set; }
-        public List<string> InsertedTokens { get; set; } = new();
     }
 }
