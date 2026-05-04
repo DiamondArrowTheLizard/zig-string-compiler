@@ -2,20 +2,20 @@ const GREETING: []const u8 = "Hello World";
 CONST, SPACE, ID, COLON, SPACE, BRACES_OPEN, BRACES_CLOSE, CONST, SPACE, U8, SPACE, EQUALS, SPACE, QUOTE, CONTENT, QUOTE, SEMICOLON
 
 <START> -> 'const' <CONST>
-    <CONST> -> ' ' <SPACE>
-        <SPACE> -> letter | digit | '_', <ID>
-            <ID> -> ':' <COLON>
-                <COLON> -> ' ' <SPACE>
-                    <SPACE> -> '[' <BRACES_OPEN>
-                        <BRACES_OPEN> -> ']' <BRACES_CLOSE>
-                            <BRACES_CLOSE> -> 'const' <CONST>
-                                <CONST> -> ' ' <SPACE>
-                                    <SPACE> -> 'u8' <U8>
-                                        <U8> -> '=' <EQUALS>
-                                            <EQUALS> -> '"' <QUOTE>
-                                                <QUOTE> -> symbols <CONTENT> | '"' <SEMICOLON>
-                                                <CONTENT> -> '"' <QUOTE>
-                                                    <QUOTE> -> ';' <SEMICOLON>
+<CONST> -> ' ' <SPACE>
+<SPACE> -> letter | digit | '_', <ID>
+<ID> -> ':' <COLON>
+<COLON> -> ' ' <SPACE>
+<SPACE> -> '[' <BRACES_OPEN>
+<BRACES_OPEN> -> ']' <BRACES_CLOSE>
+<BRACES_CLOSE> -> 'const' <CONST>
+<CONST> -> ' ' <SPACE>
+<SPACE> -> 'u8' <U8>
+<U8> -> '=' <EQUALS>
+<EQUALS> -> '"' <QUOTE>
+<QUOTE> -> symbols <CONTENT> | '"' <SEMICOLON>
+<CONTENT> -> '"' <QUOTE>
+<QUOTE> -> ';' <SEMICOLON>
 
 BT = {START, CONST, SPACE, ID, COLON}
 BN = {digit, letter, '_', ':', 'u8', '=', '"', ';', '[', ']'}
