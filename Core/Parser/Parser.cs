@@ -79,6 +79,7 @@ public class Parser
 
         int index = 0;
         State state = State.Start;
+        string? lastExpectedDescription = null;
 
         while (index < significant.Count)
         {
@@ -89,6 +90,7 @@ public class Parser
             {
                 state = Transitions[state][token.TokenCurrent];
                 index++;
+                lastExpectedDescription = null;
                 continue;
             }
 
@@ -97,12 +99,16 @@ public class Parser
             {
                 foreach (var inserted in recovery.InsertedTokens)
                 {
-                    errors.Add(new ParserError
+                    if (inserted != lastExpectedDescription)
                     {
-                        Fragment = GetTokenText(token),
-                        Location = FormatLocation(token),
-                        Description = $"Ожидался токен \"{inserted}\""
-                    });
+                        errors.Add(new ParserError
+                        {
+                            Fragment = GetTokenText(token),
+                            Location = FormatLocation(token),
+                            Description = $"Ожидался токен \"{inserted}\""
+                        });
+                        lastExpectedDescription = inserted;
+                    }
                 }
                 state = recovery.TargetState;
                 continue;
@@ -118,6 +124,9 @@ public class Parser
                 Location = FormatLocation(token),
                 Description = $"Неожиданный токен \"{tokenDesc}\", ожидался {expectedDesc}"
             });
+
+            string primaryExpected = expectedSet.First().ToString();
+            lastExpectedDescription = dictionary.GetDescription(expectedSet.First()) ?? primaryExpected;
 
             index++;
             while (index < significant.Count)
