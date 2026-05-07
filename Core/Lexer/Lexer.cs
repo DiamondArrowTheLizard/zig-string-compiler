@@ -19,64 +19,67 @@ public class Lexer
     public LexerFlags Flags => _flags;
     public uint CurrentLine { get; private set; } = 1;
 
-private Token ParseToToken(string word)
-{
-    Token token = _dictionary.GetKey(word);
-
-    if (_flags.InsideQuotes && token != Token.Quote)
+    private Token ParseToToken(string word)
     {
-        _dictionary.Insert(Token.Content, word, "Строка");
-        return Token.Content;
-    }
+        Token token = _dictionary.GetKey(word);
 
-    if (token == Token.Quote)
-    {
-        _flags.InsideQuotes = !_flags.InsideQuotes;
-        return Token.Quote;
-    }
-
-    if (token == Token.Const && _afterBrackets && _anyTokenSeen)
-    {
-        _afterBrackets = false;
-        _expectId = false;
-        return Token.ConstU8;
-    }
-
-    if (token == Token.Const)
-    {
-        if (!_declarationStarted)
+        if (_flags.InsideQuotes && token != Token.Quote)
         {
-            _declarationStarted = true;
-            _expectId = true;
+            _dictionary.Insert(Token.Content, word, "Строка");
+            return Token.Content;
         }
-        return Token.Const;
-    }
 
-    if (token == Token.Unknown)
-    {
-        if (_expectId)
+        if (token == Token.Quote)
         {
-            if (IsIdentifier(word))
+            _flags.InsideQuotes = !_flags.InsideQuotes;
+            return Token.Quote;
+        }
+
+        if (token == Token.Const && _afterBrackets && _anyTokenSeen)
+        {
+            _afterBrackets = false;
+            _expectId = false;
+            return Token.ConstU8;
+        }
+
+        if (token == Token.Const)
+        {
+            if (!_declarationStarted)
             {
-                _expectId = false;
-                if (!_dictionary.GetKey(word).Equals(Token.Id))
-                    _dictionary.Insert(Token.Id, word, "Идентификатор");
-                return Token.Id;
+                _declarationStarted = true;
+                _expectId = true;
             }
+            return Token.Const;
+        }
+
+        if (token == Token.Unknown)
+        {
+            if (_expectId)
+            {
+                if (IsIdentifier(word))
+                {
+                    _expectId = false;
+                    if (!_dictionary.GetKey(word).Equals(Token.Id))
+                        _dictionary.Insert(Token.Id, word, "Идентификатор");
+                    return Token.Id;
+                }
+                return Token.Unknown;
+            }
+
+            if (!_anyTokenSeen && !_declarationStarted)
+            {
+                _expectId = true;
+                if (IsIdentifier(word))
+                    return Token.UnknownNoConst;
+                else
+                    return Token.Unknown;
+            }
+
             return Token.Unknown;
         }
 
-        if (!_anyTokenSeen && !_declarationStarted)
-        {
-            _expectId = true;
-            return Token.UnknownNoConst;
-        }
-
-        return Token.Unknown;
+        return token;
     }
-
-    return token;
-}
 
     private static bool IsIdentifier(string word)
     {
@@ -165,49 +168,49 @@ private Token ParseToToken(string word)
                     _afterBrackets = false;
                     break;
                 case '"':
-                {
-                    const string quoteStr = "\"";
-                    Token openTok = ParseToToken(quoteStr);
-                    AddToken(CurrentLine, (uint)index, (uint)index, quoteStr, openTok);
-                    index++;
-
-                    int contentStart = index;
-                    while (index < len && line[index] != '"')
+                    {
+                        const string quoteStr = "\"";
+                        Token openTok = ParseToToken(quoteStr);
+                        AddToken(CurrentLine, (uint)index, (uint)index, quoteStr, openTok);
                         index++;
 
-                    if (index > contentStart)
-                    {
-                        string content = line.Substring(contentStart, index - contentStart);
-                        Token contentTok = ParseToToken(content);
-                        AddToken(CurrentLine, (uint)contentStart, (uint)(index - 1), content, contentTok);
-                    }
+                        int contentStart = index;
+                        while (index < len && line[index] != '"')
+                            index++;
 
-                    if (index < len && line[index] == '"')
-                    {
-                        Token closeTok = ParseToToken(quoteStr);
-                        AddToken(CurrentLine, (uint)index, (uint)index, quoteStr, closeTok);
-                        index++;
+                        if (index > contentStart)
+                        {
+                            string content = line.Substring(contentStart, index - contentStart);
+                            Token contentTok = ParseToToken(content);
+                            AddToken(CurrentLine, (uint)contentStart, (uint)(index - 1), content, contentTok);
+                        }
+
+                        if (index < len && line[index] == '"')
+                        {
+                            Token closeTok = ParseToToken(quoteStr);
+                            AddToken(CurrentLine, (uint)index, (uint)index, quoteStr, closeTok);
+                            index++;
+                        }
+                        break;
                     }
-                    break;
-                }
                 default:
-                {
-                    int start = index;
-                    while (index < len && !char.IsWhiteSpace(line[index])
-                        && line[index] != ':'
-                        && line[index] != '['
-                        && line[index] != ']'
-                        && line[index] != '='
-                        && line[index] != ';'
-                        && line[index] != '"')
                     {
-                        index++;
+                        int start = index;
+                        while (index < len && !char.IsWhiteSpace(line[index])
+                            && line[index] != ':'
+                            && line[index] != '['
+                            && line[index] != ']'
+                            && line[index] != '='
+                            && line[index] != ';'
+                            && line[index] != '"')
+                        {
+                            index++;
+                        }
+                        string word = line.Substring(start, index - start);
+                        Token tok = ParseToToken(word);
+                        AddToken(CurrentLine, (uint)start, (uint)(index - 1), word, tok);
+                        break;
                     }
-                    string word = line.Substring(start, index - start);
-                    Token tok = ParseToToken(word);
-                    AddToken(CurrentLine, (uint)start, (uint)(index - 1), word, tok);
-                    break;
-                }
             }
         }
 

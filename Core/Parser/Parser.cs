@@ -95,15 +95,15 @@ public class Parser
                     Description = "Ожидался токен \"Ключевое слово const\""
                 });
 
-                if (token.TokenCurrent == Token.UnknownNoConst || token.TokenCurrent == Token.Id || token.TokenCurrent == Token.Unknown)
+                if (token.TokenCurrent == Token.UnknownNoConst || token.TokenCurrent == Token.Id)
                 {
                     state = State.AfterId;
                     index++;
                 }
                 else
                 {
-                    index++;
                     state = State.AfterConst;
+                    index++;
                 }
                 lastExpectedDescription = null;
                 continue;
@@ -118,6 +118,34 @@ public class Parser
                     Description = "Неожиданный токен \"Unknown\", ожидался \"Идентификатор\""
                 });
                 state = State.AfterId;
+                index++;
+                lastExpectedDescription = null;
+                continue;
+            }
+
+            if (state == State.AfterCloseBracket && token.TokenCurrent == Token.Unknown)
+            {
+                errors.Add(new ParserError
+                {
+                    Fragment = GetTokenText(token),
+                    Location = FormatLocation(token),
+                    Description = "Неожиданный токен \"Unknown\", ожидался \"Ключевое слово const (u8)\""
+                });
+                state = State.AfterSecondConst;
+                index++;
+                lastExpectedDescription = null;
+                continue;
+            }
+
+            if (state == State.AfterSecondConst && token.TokenCurrent == Token.Unknown)
+            {
+                errors.Add(new ParserError
+                {
+                    Fragment = GetTokenText(token),
+                    Location = FormatLocation(token),
+                    Description = "Неожиданный токен \"Unknown\", ожидался \"Ключевое слово u8\""
+                });
+                state = State.AfterU8;
                 index++;
                 lastExpectedDescription = null;
                 continue;
