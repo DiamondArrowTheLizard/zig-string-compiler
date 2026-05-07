@@ -1,21 +1,23 @@
 const GREETING: []const u8 = "Hello World";
-CONST, SPACE, ID, COLON, SPACE, BRACES_OPEN, BRACES_CLOSE, CONST, SPACE, U8, SPACE, EQUALS, SPACE, QUOTE, CONTENT, QUOTE, SEMICOLON
+CONST, SPACE, ID, COLON, SPACE, BRACES_OPEN, BRACES_CLOSE, CONST_AFTER_BRACES, SPACE, U8, SPACE, EQUALS, SPACE, QUOTE, CONTENT, QUOTE, SEMICOLON
 
-<START> -> 'const' <CONST>
-<CONST> -> ' ' <SPACE>
-<SPACE> -> letter | digit | '_', <ID>
-<ID> -> ':' <COLON>
-<COLON> -> ' ' <SPACE>
-<SPACE> -> '[' <BRACES_OPEN>
+<START> -> 'const ' <CONST>
+<CONST> -> letter <ID> 
+<ID> -> letter <ID> | digit <ID> | '_' <ID> | ':' <COLON>
+<COLON> -> '[' <BRACES_OPEN>
 <BRACES_OPEN> -> ']' <BRACES_CLOSE>
-<BRACES_CLOSE> -> 'const' <CONST>
-<CONST> -> ' ' <SPACE>
-<SPACE> -> 'u8' <U8>
-<U8> -> '=' <EQUALS>
-<EQUALS> -> '"' <QUOTE>
-<QUOTE> -> symbols <CONTENT> | '"' <SEMICOLON>
-<CONTENT> -> '"' <QUOTE>
-<QUOTE> -> ';' <SEMICOLON>
+<BRACES_CLOSE> -> 'const ' <CONST_AFTER_BRACES>
+<CONST_AFTER_BRACES> -> 'u8' <U8>
+<U8> -> '=' <EQUALS> | ';'
+<EQUALS> -> '"' <QUOTE_1>
+<QUOTE_1> symbols <CONTENT> | '";' 
+<CONTENT> -> '"' <QUOTE_2>
+<QUOTE_2> -> ';'
 
-BT = {START, CONST, SPACE, ID, COLON}
-BN = {digit, letter, '_', ':', 'u8', '=', '"', ';', '[', ']'}
+V_T = {a, b, ..., z, A, B, ..., Z, 0, 1, ..., 9, _, :, =, ", ;, [, ]}
+V_N = {START, CONST, ID, COLON, BRACES_OPEN, BRACES_CLOSE, U8, EQUALS, QUOTE_1, CONTENT, QUOTE_2}
+
+Z = <START>
+letter -> 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+digit -> '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+symbols ∈ V_T 
