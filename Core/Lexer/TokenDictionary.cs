@@ -19,6 +19,8 @@ public class TokenDictionary
         Insert(Token.Quote, "\"", "Кавычки");
         Insert(Token.Semicolon, ";", "Конец оператора");
         Insert(Token.UnknownNoConst, "", "Пропущено ключевое слово const");
+
+        _forward[Token.ConstU8] = ("const", "Ключевое слово const (u8)");
     }
 
     public void Insert(Token key, string value, string description)

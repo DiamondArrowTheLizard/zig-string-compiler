@@ -12,59 +12,71 @@ public class Lexer
     private bool _declarationStarted = false;
     private bool _expectId = false;
     private bool _anyTokenSeen = false;
+    private bool _afterBrackets = false;
 
     public IReadOnlyList<LexerNode> Nodes => _nodes;
     public TokenDictionary Dictionary => _dictionary;
     public LexerFlags Flags => _flags;
     public uint CurrentLine { get; private set; } = 1;
 
-    private Token ParseToToken(string word)
+private Token ParseToToken(string word)
+{
+    Token token = _dictionary.GetKey(word);
+
+    if (_flags.InsideQuotes && token != Token.Quote)
     {
-        Token token = _dictionary.GetKey(word);
+        _dictionary.Insert(Token.Content, word, "Строка");
+        return Token.Content;
+    }
 
-        if (_flags.InsideQuotes && token != Token.Quote)
+    if (token == Token.Quote)
+    {
+        _flags.InsideQuotes = !_flags.InsideQuotes;
+        return Token.Quote;
+    }
+
+    if (token == Token.Const && _afterBrackets && _anyTokenSeen)
+    {
+        _afterBrackets = false;
+        _expectId = false;
+        return Token.ConstU8;
+    }
+
+    if (token == Token.Const)
+    {
+        if (!_declarationStarted)
         {
-            _dictionary.Insert(Token.Content, word, "Строка");
-            return Token.Content;
+            _declarationStarted = true;
+            _expectId = true;
         }
+        return Token.Const;
+    }
 
-        if (token == Token.Quote)
+    if (token == Token.Unknown)
+    {
+        if (_expectId)
         {
-            _flags.InsideQuotes = !_flags.InsideQuotes;
-            return Token.Quote;
-        }
-
-        if (token == Token.Const)
-        {
-            if (!_declarationStarted)
-            {
-                _declarationStarted = true;
-                _expectId = true;
-            }
-            return Token.Const;
-        }
-
-        if (token == Token.Unknown && IsIdentifier(word))
-        {
-            if (_expectId)
+            if (IsIdentifier(word))
             {
                 _expectId = false;
                 if (!_dictionary.GetKey(word).Equals(Token.Id))
                     _dictionary.Insert(Token.Id, word, "Идентификатор");
                 return Token.Id;
             }
-
-            if (!_anyTokenSeen && !_declarationStarted)
-            {
-                _expectId = true;
-                return Token.UnknownNoConst;
-            }
-
             return Token.Unknown;
         }
 
-        return token;
+        if (!_anyTokenSeen && !_declarationStarted)
+        {
+            _expectId = true;
+            return Token.UnknownNoConst;
+        }
+
+        return Token.Unknown;
     }
+
+    return token;
+}
 
     private static bool IsIdentifier(string word)
     {
@@ -135,6 +147,7 @@ public class Lexer
                 case ']':
                     AddToken(CurrentLine, (uint)index, (uint)index, "]", Token.BracesClose);
                     index++;
+                    _afterBrackets = true;
                     break;
                 case '=':
                     AddToken(CurrentLine, (uint)index, (uint)index, "=", Token.Equals);
@@ -149,6 +162,7 @@ public class Lexer
                     _declarationStarted = false;
                     _expectId = false;
                     _anyTokenSeen = false;
+                    _afterBrackets = false;
                     break;
                 case '"':
                 {

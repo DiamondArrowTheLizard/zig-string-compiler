@@ -2,17 +2,18 @@ namespace Core.Lexer;
 
 public enum Token
 {
-    UnknownNoConst = -1,
-    Unknown = 0,
-    Const = 1,
-    Space = 2,
-    Id = 3,
-    Colon = 4,
-    BracesOpen = 5,
-    BracesClose = 6,
-    U8 = 7,
-    Equals = 8,
-    Quote = 9,
-    Content = 10,
-    Semicolon = 11,
+    UnknownNoConst = 0,
+    Unknown = 1,
+    Const = 2,
+    Space = 3,
+    Id = 4,
+    Colon = 5,
+    BracesOpen = 6,
+    BracesClose = 7,
+    U8 = 8,
+    Equals = 9,
+    Quote = 10,
+    Content = 11,
+    Semicolon = 12,
+    ConstU8 = 13
 }

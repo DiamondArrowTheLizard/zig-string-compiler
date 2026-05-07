@@ -26,11 +26,11 @@ public class Parser
     private static readonly Dictionary<State, HashSet<Token>> ExpectedTokens = new()
     {
         [State.Start] = new() { Token.Const },
-        [State.AfterConst] = new() { Token.Id, Token.UnknownNoConst },
+        [State.AfterConst] = new() { Token.Id, Token.UnknownNoConst, Token.Unknown },
         [State.AfterId] = new() { Token.Colon },
         [State.AfterColon] = new() { Token.BracesOpen },
         [State.AfterOpenBracket] = new() { Token.BracesClose },
-        [State.AfterCloseBracket] = new() { Token.Const },
+        [State.AfterCloseBracket] = new() { Token.ConstU8 },
         [State.AfterSecondConst] = new() { Token.U8 },
         [State.AfterU8] = new() { Token.Equals, Token.Semicolon },
         [State.AfterEquals] = new() { Token.Quote },
@@ -45,12 +45,13 @@ public class Parser
         [State.AfterConst] = new()
         {
             [Token.Id] = State.AfterId,
-            [Token.UnknownNoConst] = State.AfterId
+            [Token.UnknownNoConst] = State.AfterId,
+            [Token.Unknown] = State.AfterId
         },
         [State.AfterId] = new() { [Token.Colon] = State.AfterColon },
         [State.AfterColon] = new() { [Token.BracesOpen] = State.AfterOpenBracket },
         [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket },
-        [State.AfterCloseBracket] = new() { [Token.Const] = State.AfterSecondConst },
+        [State.AfterCloseBracket] = new() { [Token.ConstU8] = State.AfterSecondConst },
         [State.AfterSecondConst] = new() { [Token.U8] = State.AfterU8 },
         [State.AfterU8] = new()
         {
@@ -85,7 +86,7 @@ public class Parser
         {
             var token = significant[index];
 
-            if (state == State.Start && token.TokenCurrent == Token.UnknownNoConst)
+            if (state == State.Start && token.TokenCurrent != Token.Const)
             {
                 errors.Add(new ParserError
                 {
@@ -93,16 +94,32 @@ public class Parser
                     Location = FormatLocation(token),
                     Description = "Ожидался токен \"Ключевое слово const\""
                 });
-                state = State.AfterId;   // считаем этот токен идентификатором
-                index++;
+
+                if (token.TokenCurrent == Token.UnknownNoConst || token.TokenCurrent == Token.Id || token.TokenCurrent == Token.Unknown)
+                {
+                    state = State.AfterId;
+                    index++;
+                }
+                else
+                {
+                    index++;
+                    state = State.AfterConst;
+                }
                 lastExpectedDescription = null;
                 continue;
             }
 
-            // В состоянии AfterId пропускаем лишние идентификаторы без ошибок
-            if (state == State.AfterId && (token.TokenCurrent == Token.Id || token.TokenCurrent == Token.UnknownNoConst))
+            if (state == State.AfterConst && token.TokenCurrent == Token.Unknown)
             {
+                errors.Add(new ParserError
+                {
+                    Fragment = GetTokenText(token),
+                    Location = FormatLocation(token),
+                    Description = "Неожиданный токен \"Unknown\", ожидался \"Идентификатор\""
+                });
+                state = State.AfterId;
                 index++;
+                lastExpectedDescription = null;
                 continue;
             }
 
