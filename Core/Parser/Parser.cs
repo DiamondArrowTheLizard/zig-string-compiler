@@ -26,7 +26,7 @@ public class Parser
     private static readonly Dictionary<State, HashSet<Token>> ExpectedTokens = new()
     {
         [State.Start] = new() { Token.Const },
-        [State.AfterConst] = new() { Token.Id, Token.UnknownNoConst, Token.Unknown },
+        [State.AfterConst] = new() { Token.Id },
         [State.AfterId] = new() { Token.Colon },
         [State.AfterColon] = new() { Token.BracesOpen },
         [State.AfterOpenBracket] = new() { Token.BracesClose },
@@ -42,12 +42,7 @@ public class Parser
     private static readonly Dictionary<State, Dictionary<Token, State>> Transitions = new()
     {
         [State.Start] = new() { [Token.Const] = State.AfterConst },
-        [State.AfterConst] = new()
-        {
-            [Token.Id] = State.AfterId,
-            [Token.UnknownNoConst] = State.AfterId,
-            [Token.Unknown] = State.AfterId
-        },
+        [State.AfterConst] = new() { [Token.Id] = State.AfterId },
         [State.AfterId] = new() { [Token.Colon] = State.AfterColon },
         [State.AfterColon] = new() { [Token.BracesOpen] = State.AfterOpenBracket },
         [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket },
@@ -68,18 +63,11 @@ public class Parser
         [State.AfterCloseQuote] = new() { [Token.Semicolon] = State.Start }
     };
 
-    private static readonly HashSet<Token> SynchronizingTokens = new()
-    {
-        Token.Semicolon
-    };
-
     private static bool AreTokensCompatible(Token expected, Token actual)
     {
         if (expected == actual) return true;
         if ((expected == Token.Const || expected == Token.ConstU8) &&
             (actual == Token.Const || actual == Token.ConstU8))
-            return true;
-        if (expected == Token.Id && actual == Token.UnknownNoConst)
             return true;
         return false;
     }
@@ -88,83 +76,72 @@ public class Parser
     {
         var errors = new List<ParserError>();
         var significant = nodes.Where(n => n.TokenCurrent != Token.Space).ToList();
-
         int index = 0;
         State state = State.Start;
-        string? lastExpectedDescription = null;
 
         while (index < significant.Count)
         {
             var token = significant[index];
+            var expectedSet = ExpectedTokens[state];
 
-            if (state == State.Start && token.TokenCurrent != Token.Const)
+            Token match = expectedSet.FirstOrDefault(t => AreTokensCompatible(t, token.TokenCurrent), Token.Unknown);
+            if (match != Token.Unknown)
             {
-                errors.Add(new ParserError
-                {
-                    Fragment = GetTokenText(token),
-                    Location = FormatLocation(token),
-                    Description = "Ожидался токен \"Ключевое слово const\""
-                });
-
-                state = State.AfterConst;
-                if (token.TokenCurrent == Token.UnknownNoConst || token.TokenCurrent == Token.Unknown)
-                {
-                    index++;
-                }
-                lastExpectedDescription = null;
+                state = Transitions[state][match];
+                index++;
                 continue;
             }
 
-            var expectedSet = ExpectedTokens[state];
-            var matchedToken = expectedSet.FirstOrDefault(t => AreTokensCompatible(t, token.TokenCurrent), Token.Unknown);
-
-            if (matchedToken != Token.Unknown)
+            if (token.TokenCurrent == Token.Unknown || token.TokenCurrent == Token.UnknownNoConst)
             {
-                state = Transitions[state][matchedToken];
+                Token primaryExpected = expectedSet.First();
+                errors.Add(new ParserError
+                {
+                    Fragment = token.WordCurrent ?? string.Empty,
+                    Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
+                    Description = $"Неожиданный токен \"Unknown\", ожидался \"{dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString()}\""
+                });
+
+                if (Transitions[state].TryGetValue(primaryExpected, out var nextState))
+                    state = nextState;
+
                 index++;
-                lastExpectedDescription = null;
                 continue;
             }
 
             string? insertedDescription = TryInsertSingleToken(state, token.TokenCurrent, dictionary);
             if (insertedDescription != null)
             {
-                if (insertedDescription != lastExpectedDescription)
+                errors.Add(new ParserError
                 {
-                    errors.Add(new ParserError
-                    {
-                        Fragment = GetTokenText(token),
-                        Location = FormatLocation(token),
-                        Description = $"Ожидался токен \"{insertedDescription}\""
-                    });
-                    lastExpectedDescription = insertedDescription;
-                }
+                    Fragment = string.Empty,
+                    Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
+                    Description = $"Ожидался токен \"{insertedDescription}\""
+                });
                 Token insertedToken = GetTokenByDescription(insertedDescription, dictionary);
-                if (Transitions[state].ContainsKey(insertedToken))
-                {
-                    state = Transitions[state][insertedToken];
-                }
+                state = Transitions[state][insertedToken];
                 continue;
             }
 
-            string expectedDesc = string.Join(" или ", expectedSet.Select(t =>
-                $"\"{dictionary.GetDescription(t) ?? t.ToString()}\""));
-            string tokenDesc = GetTokenDescription(token, dictionary);
-
+            string expectedDesc = string.Join(" или ", expectedSet.Select(t => $"\"{dictionary.GetDescription(t) ?? t.ToString()}\""));
             errors.Add(new ParserError
             {
-                Fragment = GetTokenText(token),
-                Location = FormatLocation(token),
-                Description = $"Неожиданный токен \"{tokenDesc}\", ожидался {expectedDesc}"
+                Fragment = token.WordCurrent ?? string.Empty,
+                Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
+                Description = $"Неожиданный токен \"{dictionary.GetDescription(token.TokenCurrent) ?? token.TokenCurrent.ToString()}\", ожидался {expectedDesc}"
             });
 
             index++;
             while (index < significant.Count)
             {
                 var next = significant[index];
-                if (SynchronizingTokens.Contains(next.TokenCurrent)) break;
+                if (next.TokenCurrent == Token.Semicolon)
+                {
+                    state = State.Start;
+                    index++;
+                    break;
+                }
                 if (ExpectedTokens[state].Any(t => AreTokensCompatible(t, next.TokenCurrent))) break;
-                if (TryInsertSingleToken(state, next.TokenCurrent, dictionary) != null) break;
                 index++;
             }
         }
@@ -174,7 +151,6 @@ public class Parser
             var missingSet = ExpectedTokens[state];
             Token recoverToken = missingSet.Contains(Token.Semicolon) ? Token.Semicolon : missingSet.First();
             
-            string desc = dictionary.GetDescription(recoverToken) ?? recoverToken.ToString();
             string location = significant.Count > 0
                 ? $"строка {significant[^1].Line}, позиция {significant[^1].WordEnd + 2}"
                 : "строка 1, позиция 1";
@@ -183,7 +159,7 @@ public class Parser
             {
                 Fragment = string.Empty,
                 Location = location,
-                Description = $"Ожидался токен \"{desc}\" в конце объявления"
+                Description = $"Ожидался токен \"{dictionary.GetDescription(recoverToken) ?? recoverToken.ToString()}\" в конце объявления"
             });
 
             if (Transitions[state].TryGetValue(recoverToken, out var nextState))
@@ -202,9 +178,7 @@ public class Parser
             if (Transitions[state].TryGetValue(expectedTok, out var nextState))
             {
                 if (ExpectedTokens[nextState].Any(t => AreTokensCompatible(t, actualToken)))
-                {
                     return dictionary.GetDescription(expectedTok) ?? expectedTok.ToString();
-                }
             }
         }
         return null;
@@ -213,14 +187,7 @@ public class Parser
     private static Token GetTokenByDescription(string description, TokenDictionary dictionary)
     {
         foreach (Token tok in Enum.GetValues(typeof(Token)))
-        {
             if (dictionary.GetDescription(tok) == description) return tok;
-        }
         return Token.Unknown;
     }
-
-    private static string FormatLocation(LexerNode token) => $"строка {token.Line}, позиция {token.WordStart + 1}";
-    private static string GetTokenText(LexerNode token) => token.WordCurrent ?? string.Empty;
-    private static string GetTokenDescription(LexerNode token, TokenDictionary dictionary) => 
-        dictionary.GetDescription(token.TokenCurrent) ?? token.TokenCurrent.ToString();
 }
