@@ -27,9 +27,9 @@ public class FileService : IFileService
 
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Open Text File",
+            Title = "Открыть текстовый файл",
             AllowMultiple = false,
-            FileTypeFilter = new[] { FilePickerFileTypes.TextPlain, FilePickerFileTypes.All }
+            FileTypeFilter = new[] { FilePickerFileTypes.All, FilePickerFileTypes.All }
         });
 
         if (files.Count == 0) return null;
@@ -63,9 +63,9 @@ public class FileService : IFileService
 
         var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Save Text File",
-            DefaultExtension = "txt",
-            FileTypeChoices = new[] { FilePickerFileTypes.TextPlain }
+            Title = "Сохранить файл",
+            DefaultExtension = "zig",
+            FileTypeChoices = new[] { FilePickerFileTypes.All }
         });
 
         if (file is null) return false;

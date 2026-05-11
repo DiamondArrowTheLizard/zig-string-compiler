@@ -24,38 +24,38 @@
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <!-- Menu -->
         <Menu Grid.Row="0">
-            <MenuItem Header="_File">
-                <MenuItem Header="_New" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N"/>
-                <MenuItem Header="_Open..." Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O"/>
-                <MenuItem Header="_Save" Command="{Binding SaveFileCommand}" InputGesture="Ctrl+S"/>
-                <MenuItem Header="Save _As..." Command="{Binding SaveFileAsCommand}"/>
+            <MenuItem Header="_Файл">
+                <MenuItem Header="_Новый" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N"/>
+                <MenuItem Header="_Открыть..." Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O"/>
+                <MenuItem Header="_Сохранить" Command="{Binding SaveFileCommand}" InputGesture="Ctrl+S"/>
+                <MenuItem Header="Сохранить Как..." Command="{Binding SaveFileAsCommand}"/>
                 <Separator/>
-                <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
+                <MenuItem Header="_Выйти" Command="{Binding ExitCommand}"/>
             </MenuItem>
-            <MenuItem Header="_Edit">
-                <MenuItem Header="_Undo" Command="{Binding UndoCommand}" InputGesture="Ctrl+Z"/>
-                <MenuItem Header="_Redo" Command="{Binding RedoCommand}" InputGesture="Ctrl+Y"/>
+            <MenuItem Header="_Редактирование">
+                <MenuItem Header="_Отменить" Command="{Binding UndoCommand}" InputGesture="Ctrl+Z"/>
+                <MenuItem Header="_Повторить" Command="{Binding RedoCommand}" InputGesture="Ctrl+Y"/>
                 <Separator/>
-                <MenuItem Header="Cu_t" Command="{Binding CutCommand}" InputGesture="Ctrl+X"/>
-                <MenuItem Header="_Copy" Command="{Binding CopyCommand}" InputGesture="Ctrl+C"/>
-                <MenuItem Header="_Paste" Command="{Binding PasteCommand}" InputGesture="Ctrl+V"/>
-                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" InputGesture="Delete"/>
+                <MenuItem Header="_Вырезать" Command="{Binding CutCommand}" InputGesture="Ctrl+X"/>
+                <MenuItem Header="_Копировать" Command="{Binding CopyCommand}" InputGesture="Ctrl+C"/>
+                <MenuItem Header="_Вставить" Command="{Binding PasteCommand}" InputGesture="Ctrl+V"/>
+                <MenuItem Header="_Удалить" Command="{Binding DeleteCommand}" InputGesture="Delete"/>
                 <Separator/>
-                <MenuItem Header="Select _All" Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A"/>
+                <MenuItem Header="_Выбрать Всё" Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A"/>
             </MenuItem>
-            <MenuItem Header="_Text">
-                <MenuItem Header="Task Statement" Command="{Binding ShowTaskCommand}"/>
-                <MenuItem Header="Grammar" Command="{Binding ShowGrammarCommand}"/>
-                <MenuItem Header="Grammar Classification" Command="{Binding ShowGrammarClassCommand}"/>
-                <MenuItem Header="Analysis Method" Command="{Binding ShowMethodCommand}"/>
-                <MenuItem Header="Test Example" Command="{Binding ShowTestCommand}"/>
-                <MenuItem Header="References" Command="{Binding ShowReferencesCommand}"/>
-                <MenuItem Header="Source Code" Command="{Binding ShowSourceCommand}"/>
+            <MenuItem Header="_Текст">
+                <MenuItem Header="Постановка Задачи" Command="{Binding ShowTaskCommand}"/>
+                <MenuItem Header="Грамматика" Command="{Binding ShowGrammarCommand}"/>
+                <MenuItem Header="Классификация Грамматики" Command="{Binding ShowGrammarClassCommand}"/>
+                <MenuItem Header="Метод Анализа" Command="{Binding ShowMethodCommand}"/>
+                <MenuItem Header="Тестовый файл" Command="{Binding ShowTestCommand}"/>
+                <MenuItem Header="Список литературы" Command="{Binding ShowReferencesCommand}"/>
+                <MenuItem Header="Исходный код программы" Command="{Binding ShowSourceCommand}"/>
             </MenuItem>
-            <MenuItem Header="_Run" Command="{Binding RunParserCommand}" InputGesture="F5"/>
-            <MenuItem Header="_Help">
-                <MenuItem Header="_Help" Command="{Binding ShowHelpCommand}" InputGesture="F1"/>
-                <MenuItem Header="_About" Command="{Binding ShowAboutCommand}"/>
+            <MenuItem Header="_Запустить" Command="{Binding RunParserCommand}" InputGesture="F5"/>
+            <MenuItem Header="_Помощь">
+                <MenuItem Header="_Помощь" Command="{Binding ShowHelpCommand}" InputGesture="F1"/>
+                <MenuItem Header="_О Программе" Command="{Binding ShowAboutCommand}"/>
             </MenuItem>
         </Menu>
 
@@ -112,7 +112,7 @@
             <avalonedit:TextEditor x:Name="Editor" Grid.Row="0"
                                    Document="{Binding Document}"
                                    FontFamily="Consolas"
-                                   FontSize="12"
+                                   FontSize="16"
                                    ShowLineNumbers="True"
                                    WordWrap="False"
                                    SyntaxHighlighting="C#"/>
@@ -120,11 +120,11 @@
             <GridSplitter Grid.Row="1" Height="4" Background="Gray" HorizontalAlignment="Stretch"/>
 
             <TabControl Grid.Row="2">
-                <TabItem Header="Lexer">
+                <TabItem Header="Лексер">
                     <views:LexerResultsView DataContext="{Binding LexerResults}"
                                             NavigateTo="OnLexerNavigate"/>
                 </TabItem>
-                <TabItem Header="Parser">
+                <TabItem Header="Парсер">
                     <views:ParserResultsView DataContext="{Binding ParserResults}"
                                              NavigateTo="OnParserNavigate"/>
                 </TabItem>

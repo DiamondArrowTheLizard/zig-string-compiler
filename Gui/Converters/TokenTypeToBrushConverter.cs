@@ -19,7 +19,7 @@ public class TokenTypeToBrushConverter : IValueConverter
                 Token.Space => Brushes.Gray,
                 Token.Colon or Token.Equals or Token.Semicolon => Brushes.DarkOrange,
                 Token.BracesOpen or Token.BracesClose => Brushes.Purple,
-                Token.Id => Brushes.Black,
+                Token.Id => Brushes.Green,
                 _ => Brushes.Red
             };
         }

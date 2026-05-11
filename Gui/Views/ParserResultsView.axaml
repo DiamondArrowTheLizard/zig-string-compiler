@@ -13,9 +13,9 @@
               AutoGenerateColumns="False" IsReadOnly="True"
               DoubleTapped="OnDoubleTapped">
         <DataGrid.Columns>
-            <DataGridTextColumn Header="Fragment" Binding="{Binding Fragment}" Width="350"/>
-            <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="350"/>
-            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+            <DataGridTextColumn Header="Неверный Фрагмент" Binding="{Binding Fragment}" Width="350"/>
+            <DataGridTextColumn Header="Местоположение" Binding="{Binding Location}" Width="350"/>
+            <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
         </DataGrid.Columns>
     </DataGrid>
 </UserControl>

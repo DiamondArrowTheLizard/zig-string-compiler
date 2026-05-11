@@ -18,7 +18,7 @@ public class LexerCsv
 
         foreach (var node in lexer.Nodes)
         {
-            string typeDesc = node.TokenDesc ?? "UNKNOWN";
+            string typeDesc = node.TokenDesc ?? "Неизвестный токен";
             string value = node.WordCurrent ?? "";
             string line = $"{node.TokenCurrent:D},{typeDesc},{value},строка {node.Line}, {node.WordStart}-{node.WordEnd}";
             _content.Add(line);

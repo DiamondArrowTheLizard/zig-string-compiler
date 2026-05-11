@@ -28,7 +28,7 @@ public class DialogService : IDialogService
         if (owner == null)
             return Task.CompletedTask;
 
-        var dialog = new ConfirmationDialog(title, $"{message}\n\nPress any button to close.");
+        var dialog = new ConfirmationDialog(title, $"{message}\n\nНажмите любую клавишу для закрытия.");
         return dialog.ShowDialog<bool>(owner);
     }
 

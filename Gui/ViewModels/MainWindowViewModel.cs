@@ -39,7 +39,7 @@ public partial class MainWindowViewModel : ObservableObject
     private ParserResultsViewModel _parserResults = new();
 
     [ObservableProperty]
-    private string _statusText = "Ready";
+    private string _statusText = "Готов";
 
     public TextDocument Document { get; } = new();
 
@@ -68,7 +68,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (!IsModified) return true;
         if (ConfirmDiscardRequested != null)
             return await ConfirmDiscardRequested();
-        return true; // fallback
+        return true;
     }
 
 
@@ -77,12 +77,12 @@ public partial class MainWindowViewModel : ObservableObject
         if (await _fileService.SaveFileAsync(CurrentFilePath, Document.Text))
         {
             IsModified = false;
-            StatusText = "File saved";
+            StatusText = "Файл Сохранён";
             return true;
         }
         else
         {
-            await _dialogService.ShowMessageAsync("Error", "Could not save file.");
+            await _dialogService.ShowMessageAsync("Error", "Файл не был сохранён.");
             return false;
         }
     }
@@ -96,7 +96,7 @@ public partial class MainWindowViewModel : ObservableObject
         IsModified = false;
         LexerResults.Items.Clear();
         ParserResults.Items.Clear();
-        StatusText = "New file created";
+        StatusText = "Создан новый файл";
     }
 
     [RelayCommand]
@@ -111,7 +111,7 @@ public partial class MainWindowViewModel : ObservableObject
             IsModified = false;
             LexerResults.Items.Clear();
             ParserResults.Items.Clear();
-            StatusText = "File opened";
+            StatusText = "Открыт файл";
         }
     }
 
@@ -127,7 +127,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (await _fileService.SaveFileAsAsync(Document.Text))
         {
             IsModified = false;
-            StatusText = "File saved";
+            StatusText = "Файл Сохранён";
         }
     }
 
@@ -199,7 +199,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         var allTokens = lexer.Nodes.Select(n => new TokenInfo(
             n.TokenCurrent,
-            n.TokenDesc ?? "UNKNOWN",
+            n.TokenDesc ?? "Неизвестный токен",
             n.WordCurrent ?? "",
             n.Line,
             n.WordStart,
@@ -222,7 +222,7 @@ public partial class MainWindowViewModel : ObservableObject
             ParserResults.Items.Add(new ParserErrorInfo(error.Fragment, error.Location, error.Description));
         }
 
-        StatusText = $"Tokens: {allTokens.Count}, errors: {errorTokens.Count}, parser errors: {ParserResults.Items.Count}";
+        StatusText = $"Токены: {allTokens.Count}, Лексические ошибки: {errorTokens.Count}, Ошибок парсера: {ParserResults.Items.Count}";
     }
 
     [RelayCommand]

@@ -104,7 +104,7 @@ public class Lexer
             WordEnd = end,
             WordCurrent = lexeme,
             TokenCurrent = type,
-            TokenDesc = _dictionary.GetDescription(type) ?? "UNKNOWN"
+            TokenDesc = _dictionary.GetDescription(type) ?? "Неизвестный токен"
         };
 
         if (_nodes.Count > 0)

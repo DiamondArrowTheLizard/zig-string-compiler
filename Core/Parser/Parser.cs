@@ -95,7 +95,7 @@ public class Parser
             if (token.TokenCurrent == Token.Unknown || token.TokenCurrent == Token.UnknownNoConst)
             {
                 Token primaryExpected = expectedSet.First();
-                string actualDesc = dictionary.GetDescription(token.TokenCurrent) ?? "Unknown";
+                string actualDesc = dictionary.GetDescription(token.TokenCurrent) ?? "Неизвестный токен";
 
                 bool isExtraGarbage = false;
                 if (index + 1 < significant.Count)
