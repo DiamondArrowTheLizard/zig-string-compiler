@@ -135,6 +135,11 @@ digit -> '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 symbols ∈ V_T 
 ```
 
+```
+V_T = {a, b, ..., z, A, B, ..., Z, 0, 1, ..., 9, _, :, =, ", ;, [, ]}
+V_N = {START, CONST, ID, COLON, BRACES_OPEN, BRACES_CLOSE, CONST_AFTER_BRACES, U8, EQUALS, QUOTE_1, CONTENT, QUOTE_2}
+```
+
 ## Грамматика - автоматная
 ![CLASS](Assets/class.png)
 
