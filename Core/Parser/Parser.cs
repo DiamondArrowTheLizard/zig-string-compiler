@@ -30,7 +30,7 @@ public class Parser
         [State.AfterConst] = new() { Token.Id },
         [State.AfterId] = new() { Token.Colon },
         [State.AfterColon] = new() { Token.BracesOpen },
-        [State.AfterOpenBracket] = new() { Token.BracesClose },
+        [State.AfterOpenBracket] = new() { Token.BracesClose, Token.ConstU8 },
         [State.AfterCloseBracket] = new() { Token.ConstU8 },
         [State.AfterSecondConst] = new() { Token.U8 },
         [State.AfterU8] = new() { Token.Equals, Token.Semicolon },
@@ -46,7 +46,7 @@ public class Parser
         [State.AfterConst] = new() { [Token.Id] = State.AfterId },
         [State.AfterId] = new() { [Token.Colon] = State.AfterColon },
         [State.AfterColon] = new() { [Token.BracesOpen] = State.AfterOpenBracket },
-        [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket },
+        [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket, [Token.ConstU8] = State.AfterSecondConst },
         [State.AfterCloseBracket] = new() { [Token.ConstU8] = State.AfterSecondConst },
         [State.AfterSecondConst] = new() { [Token.U8] = State.AfterU8 },
         [State.AfterU8] = new()
@@ -85,7 +85,7 @@ public class Parser
         {
             var token = significant[index];
 
-            if (token.TokenCurrent == Token.Const && state != State.Start)
+            if (token.TokenCurrent == Token.Const && state != State.Start && state != State.AfterOpenBracket && state != State.AfterCloseBracket)
             {
                 state = State.Start;
             }
@@ -104,19 +104,16 @@ public class Parser
             if (token.TokenCurrent == Token.Unknown || token.TokenCurrent == Token.UnknownNoConst)
             {
                 string expectedDesc = string.Join(" или ", expectedSet.Select(t => $"\"{dictionary.GetDescription(t) ?? t.ToString()}\""));
-
                 errors.Add(new ParserError
                 {
                     Fragment = token.WordCurrent ?? string.Empty,
                     Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
                     Description = $"Недопустимый символ \"{token.WordCurrent}\". Ожидался {expectedDesc}"
                 });
-                
+
                 if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
-                {
-                    state = State.AfterId; 
-                }
-                
+                    state = State.AfterId;
+
                 lastExpected = expectedDesc;
                 index++;
                 continue;
@@ -125,10 +122,7 @@ public class Parser
             string? insertedDescription = TryInsertSingleToken(state, token.TokenCurrent, dictionary);
             if (insertedDescription != null)
             {
-                string normalizedInserted = insertedDescription.Replace("\"", "");
-                string normalizedLast = lastExpected.Replace("\"", "");
-
-                if(!normalizedLast.Contains(normalizedInserted))
+                if (!lastExpected.Contains(insertedDescription.Replace("\"", "")))
                 {
                     errors.Add(new ParserError
                     {
@@ -138,16 +132,7 @@ public class Parser
                     });
                     lastExpected = insertedDescription;
                 }
-                
-                Token insertedToken = GetTokenByDescription(insertedDescription, dictionary);
-                if (Transitions[state].ContainsKey(insertedToken))
-                {
-                    state = Transitions[state][insertedToken];
-                }
-                else
-                {
-                    index++; 
-                }
+                state = Transitions[state][GetTokenByDescription(insertedDescription, dictionary)];
                 continue;
             }
 
@@ -159,7 +144,6 @@ public class Parser
                 Description = $"Неожиданный токен \"{dictionary.GetDescription(token.TokenCurrent) ?? token.TokenCurrent.ToString()}\", ожидался {errExpectedDesc}"
             });
             lastExpected = dictionary.GetDescription(token.TokenCurrent) ?? "null";
-
             index++;
         }
 
@@ -170,7 +154,7 @@ public class Parser
             Token primaryExpected = expectedSet.First();
             string desc = dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString();
 
-            if(!lastExpected.Contains(desc))
+            if (!lastExpected.Contains(desc.Replace("\"", "")))
             {
                 errors.Add(new ParserError
                 {
@@ -180,6 +164,7 @@ public class Parser
                 });
                 lastExpected = desc;
             }
+
             if (Transitions[state].TryGetValue(primaryExpected, out var nextState))
                 state = nextState;
             else
@@ -191,16 +176,13 @@ public class Parser
 
     private static string? TryInsertSingleToken(State state, Token actualToken, TokenDictionary dictionary)
     {
-        if (!ExpectedTokens.ContainsKey(state)) return null;
-
+        if (!Transitions.ContainsKey(state)) return null;
         foreach (var expectedTok in ExpectedTokens[state])
         {
             if (Transitions[state].TryGetValue(expectedTok, out var nextState))
             {
                 if (ExpectedTokens[nextState].Any(t => AreTokensCompatible(t, actualToken)))
-                {
                     return dictionary.GetDescription(expectedTok) ?? expectedTok.ToString();
-                }
             }
         }
         return null;
