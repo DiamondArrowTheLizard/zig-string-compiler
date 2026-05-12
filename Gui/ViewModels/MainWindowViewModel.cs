@@ -247,7 +247,17 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowTask() => ShowInfo("Постановка задачи", "Описание задания...");
+    private void ShowTask()
+    {
+        var taskWindow = new TaskWindow();
+
+        var mainWindow = (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        if (mainWindow != null)
+            taskWindow.ShowDialog(mainWindow);
+        else
+            taskWindow.Show();
+    }
+
     [RelayCommand]
     private void ShowGrammar() => ShowInfo("Грамматика", "Описание грамматики...");
     [RelayCommand]
