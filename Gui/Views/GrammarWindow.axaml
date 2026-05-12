@@ -1,0 +1,66 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Gui.Views.GrammarWindow"
+        Title="Грамматика и классификация" 
+        Width="750" Height="650" 
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,20,0,10"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        </Style>
+        <Style Selector="Border.code-block">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="TextBlock.code">
+            <Setter Property="FontFamily" Value="Consolas, Courier New"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </Window.Styles>
+
+    <ScrollViewer>
+        <StackPanel Margin="25">
+            <TextBlock Text="Описание грамматики" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,0,0,20"/>
+
+            <TextBlock Text="Формальное определение" Classes="h2"/>
+            <Border Classes="code-block">
+                <StackPanel Spacing="5">
+                    <TextBlock Classes="code" Text="Грамматика G = (VT, VN, P, Z)"/>
+                    <TextBlock Classes="code" Text="VT = {a..z, A..Z, 0..9, _, :, =, [, ], &quot;, ;, ' '}"/>
+                    <TextBlock Classes="code" Text="VN = {START, CONST, ID, COLON, BRACES_OPEN, BRACES_CLOSE, U8, EQUALS, QUOTE_1, CONTENT, QUOTE_2}"/>
+                    <TextBlock Classes="code" FontWeight="Bold" Text="Целевой символ Z = &lt;START&gt;"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Правила вывода P" Classes="h2"/>
+            <Border Classes="code-block">
+                <StackPanel Spacing="3">
+                    <TextBlock Classes="code" Text="&lt;START&gt;  → 'const ' &lt;CONST&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;CONST&gt;  → letter &lt;ID&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;ID&gt;     → letter &lt;ID&gt; | digit &lt;ID&gt; | '_' &lt;ID&gt; | ':' &lt;COLON&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;COLON&gt;  → '[' &lt;BRACES_OPEN&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;BRACES_OPEN&gt;  → ']' &lt;BRACES_CLOSE&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;BRACES_CLOSE&gt; → 'const ' &lt;CONST_AFTER_BRACES&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;CONST_AFTER_BRACES&gt; → 'u8' &lt;U8&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;U8&gt;     → '=' &lt;EQUALS&gt; | ';'"/>
+                    <TextBlock Classes="code" Text="&lt;EQUALS&gt; → '&quot;' &lt;QUOTE_1&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;QUOTE_1&gt; → symbols &lt;CONTENT&gt; | '&quot;;'"/>
+                    <TextBlock Classes="code" Text="&lt;CONTENT&gt; → '&quot;' &lt;QUOTE_2&gt;"/>
+                    <TextBlock Classes="code" Text="&lt;QUOTE_2&gt; → ';'"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

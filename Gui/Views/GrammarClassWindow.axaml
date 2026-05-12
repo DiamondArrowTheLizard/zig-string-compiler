@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Gui.Views.GrammarClassWindow"
+        Title="Классификация грамматики" 
+        Width="600" Height="350" 
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="Border.code-highlight">
+            <Setter Property="Background" Value="#e9ecef"/>
+            <Setter Property="BorderBrush" Value="#dee2e6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,15"/>
+        </Style>
+        <Style Selector="TextBlock.code-text">
+            <Setter Property="FontFamily" Value="Consolas, Courier New, monospace"/>
+            <Setter Property="Foreground" Value="#0056b3"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+    </Window.Styles>
+
+    <ScrollViewer>
+        <StackPanel Margin="30">
+            <TextBlock Text="Классификация грамматики" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,0,0,25"/>
+
+            <TextBlock TextWrapping="Wrap" FontSize="15" LineHeight="22">
+                Грамматика относится к <Run FontWeight="Bold">регулярным (автоматным) грамматикам</Run>, 
+                поскольку все её правила имеют праволинейную форму:
+            </TextBlock>
+
+            <Border Classes="code-highlight">
+                <TextBlock Text="A → aB | a | ε" Classes="code-text"/>
+            </Border>
+
+            <TextBlock TextWrapping="Wrap" FontSize="15" LineHeight="22">
+                и допускают эквивалентное представление в виде детерминированного конечного автомата.
+            </TextBlock>
+
+            <Separator Margin="0,20" Height="1" Background="{DynamicResource MaterialDesignDivider}"/>
+
+            <TextBlock TextWrapping="Wrap" FontSize="14" Opacity="0.8">
+                Конструкция не содержит вложенности и обрабатывается последовательным переходом между состояниями.
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

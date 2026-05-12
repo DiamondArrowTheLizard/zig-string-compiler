@@ -259,9 +259,26 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowGrammar() => ShowInfo("Грамматика", "Описание грамматики...");
+    private void ShowGrammar()
+    {
+        var window = new GrammarWindow();
+        var mainWindow = (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        if (mainWindow != null) window.ShowDialog(mainWindow);
+        else window.Show();
+    }
+
     [RelayCommand]
-    private void ShowGrammarClass() => ShowInfo("Классификация грамматики", "...");
+    private void ShowGrammarClass()
+    {
+        var window = new GrammarClassWindow();
+        var mainWindow = (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+        if (mainWindow != null)
+            window.ShowDialog(mainWindow);
+        else
+            window.Show();
+    }
+
     [RelayCommand]
     private void ShowMethod() => ShowInfo("Метод анализа", "...");
     [RelayCommand]
