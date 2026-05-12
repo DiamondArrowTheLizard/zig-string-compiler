@@ -114,7 +114,7 @@ public class Parser
                 
                 if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
                 {
-                    state = State.AfterConst;
+                    state = State.AfterId; 
                 }
                 
                 lastExpected = expectedDesc;
@@ -138,18 +138,15 @@ public class Parser
                     });
                     lastExpected = insertedDescription;
                 }
+                
                 Token insertedToken = GetTokenByDescription(insertedDescription, dictionary);
-                try
+                if (Transitions[state].ContainsKey(insertedToken))
                 {
                     state = Transitions[state][insertedToken];
                 }
-                catch (KeyNotFoundException ex)
+                else
                 {
-                    Console.WriteLine($"STATE: {state}, TOKEN: {insertedToken}, DESC: {insertedDescription}: {ex}");
-                    state = Transitions[State.AfterConst][Token.Id];
-                    insertedDescription = TryInsertSingleToken(state, Token.Id, dictionary);
-                    Console.WriteLine($"STATE_NEW: {state}, DESC: {insertedDescription}");
-                    continue;
+                    index++; 
                 }
                 continue;
             }
@@ -194,6 +191,8 @@ public class Parser
 
     private static string? TryInsertSingleToken(State state, Token actualToken, TokenDictionary dictionary)
     {
+        if (!ExpectedTokens.ContainsKey(state)) return null;
+
         foreach (var expectedTok in ExpectedTokens[state])
         {
             if (Transitions[state].TryGetValue(expectedTok, out var nextState))
