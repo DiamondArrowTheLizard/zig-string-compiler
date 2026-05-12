@@ -12,7 +12,8 @@ public class Lexer
     private bool _declarationStarted = false;
     private bool _expectId = false;
     private bool _anyTokenSeen = false;
-    private bool _afterBrackets = false;
+    private bool _afterBracketOpen = false;
+    private bool _afterBracketClose = false;
 
     public IReadOnlyList<LexerNode> Nodes => _nodes;
     public TokenDictionary Dictionary => _dictionary;
@@ -35,9 +36,10 @@ public class Lexer
             return Token.Quote;
         }
 
-        if (token == Token.Const && _afterBrackets && _anyTokenSeen)
+        if (token == Token.Const && (_afterBracketClose || _afterBracketOpen) && _anyTokenSeen)
         {
-            _afterBrackets = false;
+            _afterBracketOpen = false;
+            _afterBracketClose = false;
             _expectId = false;
             return Token.ConstU8;
         }
@@ -145,12 +147,13 @@ public class Lexer
                     break;
                 case '[':
                     AddToken(CurrentLine, (uint)index, (uint)index, "[", Token.BracesOpen);
+                    _afterBracketOpen = true;
                     index++;
                     break;
                 case ']':
                     AddToken(CurrentLine, (uint)index, (uint)index, "]", Token.BracesClose);
                     index++;
-                    _afterBrackets = true;
+                    _afterBracketClose = true;
                     break;
                 case '=':
                     AddToken(CurrentLine, (uint)index, (uint)index, "=", Token.Equals);
@@ -165,7 +168,8 @@ public class Lexer
                     _declarationStarted = false;
                     _expectId = false;
                     _anyTokenSeen = false;
-                    _afterBrackets = false;
+                    _afterBracketOpen = false;
+                    _afterBracketClose = false;
                     break;
                 case '"':
                     {

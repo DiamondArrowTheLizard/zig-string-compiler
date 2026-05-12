@@ -79,6 +79,7 @@ public class Parser
         var significant = nodes.Where(n => n.TokenCurrent != Token.Space).ToList();
         int index = 0;
         State state = State.Start;
+        lastExpected = "unchanged";
 
         while (index < significant.Count)
         {
@@ -86,16 +87,6 @@ public class Parser
 
             if (token.TokenCurrent == Token.Const && state != State.Start)
             {
-                var expectedSetBeforeReset = ExpectedTokens[state];
-                foreach (var exp in expectedSetBeforeReset)
-                {
-                    errors.Add(new ParserError
-                    {
-                        Fragment = string.Empty,
-                        Location = $"строка {token.Line - 1}, позиция {token.WordStart}",
-                        Description = $"Пропущена кавычка или точка с запятой. Ожидался токен \"{dictionary.GetDescription(exp) ?? exp.ToString()}\""
-                    });
-                }
                 state = State.Start;
             }
 
@@ -106,6 +97,7 @@ public class Parser
             {
                 state = Transitions[state][match];
                 index++;
+                lastExpected = "unchanged";
                 continue;
             }
 
@@ -119,8 +111,13 @@ public class Parser
                     Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
                     Description = $"Недопустимый символ \"{token.WordCurrent}\". Ожидался {expectedDesc}"
                 });
+                
+                if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
+                {
+                    state = State.AfterConst;
+                }
+                
                 lastExpected = expectedDesc;
-
                 index++;
                 continue;
             }
@@ -128,8 +125,10 @@ public class Parser
             string? insertedDescription = TryInsertSingleToken(state, token.TokenCurrent, dictionary);
             if (insertedDescription != null)
             {
-                Console.WriteLine($"last expected insertedDesc: {lastExpected}, inserted: {insertedDescription}");
-                if(!lastExpected.Equals(insertedDescription))
+                string normalizedInserted = insertedDescription.Replace("\"", "");
+                string normalizedLast = lastExpected.Replace("\"", "");
+
+                if(!normalizedLast.Contains(normalizedInserted))
                 {
                     errors.Add(new ParserError
                     {
@@ -137,6 +136,7 @@ public class Parser
                         Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
                         Description = $"Ожидался токен \"{insertedDescription}\""
                     });
+                    lastExpected = insertedDescription;
                 }
                 Token insertedToken = GetTokenByDescription(insertedDescription, dictionary);
                 state = Transitions[state][insertedToken];
@@ -160,17 +160,17 @@ public class Parser
             var lastToken = significant.Last();
             var expectedSet = ExpectedTokens[state];
             Token primaryExpected = expectedSet.First();
+            string desc = dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString();
 
-            Console.WriteLine($"last expected primaryEx: {lastExpected}, prim: {dictionary.GetDescription(primaryExpected)}");
-            if(!lastExpected.Equals( dictionary.GetDescription(primaryExpected) ) )
+            if(!lastExpected.Contains(desc))
             {
                 errors.Add(new ParserError
                 {
                     Fragment = string.Empty,
                     Location = $"строка {lastToken.Line}, позиция {lastToken.WordEnd + 2}",
-                    Description = $"Ожидался токен \"{dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString()}\""
+                    Description = $"Ожидался токен \"{desc}\""
                 });
-
+                lastExpected = desc;
             }
             if (Transitions[state].TryGetValue(primaryExpected, out var nextState))
                 state = nextState;
@@ -180,6 +180,7 @@ public class Parser
 
         return new ParseResult { Success = errors.Count == 0, Errors = errors };
     }
+
     private static string? TryInsertSingleToken(State state, Token actualToken, TokenDictionary dictionary)
     {
         foreach (var expectedTok in ExpectedTokens[state])
