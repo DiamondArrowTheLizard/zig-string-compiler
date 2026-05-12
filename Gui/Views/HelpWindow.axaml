@@ -3,8 +3,65 @@
         xmlns:vm="clr-namespace:Gui.ViewModels"
         x:Class="Gui.Views.HelpWindow"
         x:DataType="vm:HelpViewModel"
-        Title="Help" Width="500" Height="400" WindowStartupLocation="CenterOwner">
+        Title="Справочная система" 
+        Width="700" Height="600" 
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,15,0,10"/>
+        </Style>
+        <Style Selector="DataGrid">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="GridLinesVisibility" Value="All"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+    </Window.Styles>
+
     <ScrollViewer>
-        <TextBlock Text="{Binding HelpText}" TextWrapping="Wrap" Margin="10"/>
+        <StackPanel Margin="20">
+            <TextBlock Text="Руководство пользователя" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,0,0,20"/>
+
+            <TextBlock Text="1. Панель инструментов" Classes="h2"/>
+            <DataGrid ItemsSource="{Binding ToolbarItems}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Кнопка" Binding="{Binding Name}" Width="150"/>
+                    <DataGridTextColumn Header="Функциональное назначение" Binding="{Binding Description}" Width="*"/>
+                    <DataGridTextColumn Header="Клавиши" Binding="{Binding Keys}" Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="2. Главное меню программы" Classes="h2"/>
+            
+            <TextBlock Text="Меню «Файл»" FontWeight="SemiBold" Margin="0,5"/>
+            <DataGrid ItemsSource="{Binding FileMenuItems}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Пункт" Binding="{Binding Name}" Width="150"/>
+                    <DataGridTextColumn Header="Описание действия" Binding="{Binding Description}" Width="*"/>
+                    <DataGridTextColumn Header="Клавиши" Binding="{Binding Keys}" Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="Меню «Правка»" FontWeight="SemiBold" Margin="0,5"/>
+            <DataGrid ItemsSource="{Binding EditMenuItems}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Пункт" Binding="{Binding Name}" Width="150"/>
+                    <DataGridTextColumn Header="Описание действия" Binding="{Binding Description}" Width="*"/>
+                    <DataGridTextColumn Header="Клавиши" Binding="{Binding Keys}" Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="© 2026 Справочная документация приложения" 
+                       HorizontalAlignment="Center" 
+                       FontSize="11" 
+                       Opacity="0.6" 
+                       Margin="0,20,0,0"/>
+        </StackPanel>
     </ScrollViewer>
 </Window>
