@@ -48,9 +48,9 @@
                 <MenuItem Header="Грамматика" Command="{Binding ShowGrammarCommand}"/>
                 <MenuItem Header="Классификация Грамматики" Command="{Binding ShowGrammarClassCommand}"/>
                 <MenuItem Header="Метод Анализа" Command="{Binding ShowMethodCommand}"/>
-                <MenuItem Header="Тестовый файл" Command="{Binding ShowTestCommand}"/>
-                <MenuItem Header="Список литературы" Command="{Binding ShowReferencesCommand}"/>
-                <MenuItem Header="Исходный код программы" Command="{Binding ShowSourceCommand}"/>
+                <MenuItem Header="Тестовый Пример" Command="{Binding ShowTestCommand}"/>
+                <MenuItem Header="Список Литературы" Command="{Binding ShowReferencesCommand}"/>
+                <MenuItem Header="Исходный Код Программы" Command="{Binding ShowSourceCommand}"/>
             </MenuItem>
             <MenuItem Header="_Запустить" Command="{Binding RunParserCommand}" InputGesture="F5"/>
             <MenuItem Header="_Помощь">
