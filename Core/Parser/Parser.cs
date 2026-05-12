@@ -139,7 +139,18 @@ public class Parser
                     lastExpected = insertedDescription;
                 }
                 Token insertedToken = GetTokenByDescription(insertedDescription, dictionary);
-                state = Transitions[state][insertedToken];
+                try
+                {
+                    state = Transitions[state][insertedToken];
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    Console.WriteLine($"STATE: {state}, TOKEN: {insertedToken}, DESC: {insertedDescription}: {ex}");
+                    state = Transitions[State.AfterConst][Token.Id];
+                    insertedDescription = TryInsertSingleToken(state, Token.Id, dictionary);
+                    Console.WriteLine($"STATE_NEW: {state}, DESC: {insertedDescription}");
+                    continue;
+                }
                 continue;
             }
 
