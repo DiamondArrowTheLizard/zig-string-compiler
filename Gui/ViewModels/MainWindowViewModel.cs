@@ -280,7 +280,17 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowMethod() => ShowInfo("Метод анализа", "...");
+    private void ShowMethod()
+    {
+        var window = new MethodWindow();
+        var mainWindow = (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+        if (mainWindow != null)
+            window.ShowDialog(mainWindow);
+        else
+            window.Show();
+    }
+
     [RelayCommand]
     private void ShowTest() => ShowInfo("Тестовый пример", "...");
     [RelayCommand]
