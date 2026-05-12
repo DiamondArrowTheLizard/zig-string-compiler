@@ -82,6 +82,22 @@ public class Parser
         while (index < significant.Count)
         {
             var token = significant[index];
+
+            if (token.TokenCurrent == Token.Const && state != State.Start)
+            {
+                var expectedSetBeforeReset = ExpectedTokens[state];
+                foreach (var exp in expectedSetBeforeReset)
+                {
+                    errors.Add(new ParserError
+                    {
+                        Fragment = string.Empty,
+                        Location = $"строка {token.Line - 1}, позиция {token.WordStart}",
+                        Description = $"Пропущена кавычка или точка с запятой перед новой декларацией. Ожидался токен \"{dictionary.GetDescription(exp) ?? exp.ToString()}\""
+                    });
+                }
+                state = State.Start;
+            }
+
             var expectedSet = ExpectedTokens[state];
 
             Token match = expectedSet.FirstOrDefault(t => AreTokensCompatible(t, token.TokenCurrent), Token.Unknown);
@@ -95,30 +111,15 @@ public class Parser
             if (token.TokenCurrent == Token.Unknown || token.TokenCurrent == Token.UnknownNoConst)
             {
                 Token primaryExpected = expectedSet.First();
-                string actualDesc = dictionary.GetDescription(token.TokenCurrent) ?? "Неизвестный токен";
-
-                bool isExtraGarbage = false;
-                if (index + 1 < significant.Count)
-                {
-                    var nextToken = significant[index + 1];
-                    if (expectedSet.Any(t => AreTokensCompatible(t, nextToken.TokenCurrent)))
-                    {
-                        isExtraGarbage = true;
-                    }
-                }
-
                 errors.Add(new ParserError
                 {
                     Fragment = token.WordCurrent ?? string.Empty,
                     Location = $"строка {token.Line}, позиция {token.WordStart + 1}",
-                    Description = $"Неожиданный токен \"{actualDesc}\", ожидался \"{dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString()}\""
+                    Description = $"Неожиданный токен, ожидался \"{dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString()}\""
                 });
 
-                if (!isExtraGarbage)
-                {
-                    if (Transitions[state].TryGetValue(primaryExpected, out var nextState))
-                        state = nextState;
-                }
+                if (Transitions[state].TryGetValue(primaryExpected, out var nextState))
+                    state = nextState;
 
                 index++;
                 continue;
@@ -147,6 +148,25 @@ public class Parser
             });
 
             index++;
+        }
+
+        while (state != State.Start && significant.Count > 0)
+        {
+            var lastToken = significant.Last();
+            var expectedSet = ExpectedTokens[state];
+            Token primaryExpected = expectedSet.First();
+
+            errors.Add(new ParserError
+            {
+                Fragment = string.Empty,
+                Location = $"строка {lastToken.Line}, позиция {lastToken.WordEnd + 2}",
+                Description = $"Ожидался токен \"{dictionary.GetDescription(primaryExpected) ?? primaryExpected.ToString()}\""
+            });
+
+            if (Transitions[state].TryGetValue(primaryExpected, out var nextState))
+                state = nextState;
+            else
+                break;
         }
 
         return new ParseResult { Success = errors.Count == 0, Errors = errors };

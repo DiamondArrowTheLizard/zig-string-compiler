@@ -214,6 +214,7 @@ public class Lexer
             }
         }
 
+        _flags.InsideQuotes = false;
         CurrentLine++;
     }
 }
