@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Gui.Views.ReferencesWindow"
+        Title="Список литературы" 
+        Width="700" Height="450" 
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.li-number">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+        <Style Selector="TextBlock.li-text">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="22"/>
+        </Style>
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimaryHostBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+            <Setter Property="TextBlock.TextDecorations" Value="Underline"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </Window.Styles>
+
+    <ScrollViewer>
+        <StackPanel Margin="30">
+            <TextBlock Text="Список использованных источников" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,0,0,30"/>
+
+            <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,20">
+                <TextBlock Grid.Column="0" Text="1." Classes="li-number"/>
+                <TextBlock Grid.Column="1" Classes="li-text"
+                           Text="Шорников Ю.В. Теория и практика языковых процессоров: учеб. пособие / Ю.В. Шорников. – Новосибирск: Изд-во НГТУ, 2004."/>
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,20">
+                <TextBlock Grid.Column="0" Text="2." Classes="li-number"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Classes="li-text" 
+                               Text="Теория формальных языков и компиляторов [Электронный ресурс] / Электрон. дан."/>
+                    <Button Classes="link" Content="https://dispace.edu.nstu.ru/didesk/course/show/8594"
+                            Click="OpenLink_Click"/>
+                    <TextBlock Text="свободный. Яз. рус." Opacity="0.7" FontSize="12"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,20">
+                <TextBlock Grid.Column="0" Text="3." Classes="li-number"/>
+                <TextBlock Grid.Column="1" Classes="li-text"
+                           Text="Хантер Р. Проектирование и конструирование компиляторов / Р. Хантер. – Москва: Мир, 1984. – 232 с."/>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>
