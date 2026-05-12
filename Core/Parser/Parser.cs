@@ -43,7 +43,7 @@ public class Parser
     private static readonly Dictionary<State, Dictionary<Token, State>> Transitions = new()
     {
         [State.Start] = new() { [Token.Const] = State.AfterConst },
-        [State.AfterConst] = new() { [Token.Id] = State.AfterId },
+        [State.AfterConst] = new() { [Token.Id] = State.AfterId, [Token.Unknown] = State.AfterId },
         [State.AfterId] = new() { [Token.Colon] = State.AfterColon },
         [State.AfterColon] = new() { [Token.BracesOpen] = State.AfterOpenBracket },
         [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket, [Token.ConstU8] = State.AfterSecondConst },
