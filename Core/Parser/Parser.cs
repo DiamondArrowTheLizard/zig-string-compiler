@@ -85,6 +85,7 @@ public class Parser
         {
             var token = significant[index];
 
+            
             if (token.TokenCurrent == Token.Const && state != State.Start && state != State.AfterOpenBracket && state != State.AfterCloseBracket)
             {
                 state = State.Start;
@@ -101,6 +102,7 @@ public class Parser
                 continue;
             }
 
+            
             if (token.TokenCurrent == Token.Unknown || token.TokenCurrent == Token.UnknownNoConst)
             {
                 string expectedDesc = string.Join(" или ", expectedSet.Select(t => $"\"{dictionary.GetDescription(t) ?? t.ToString()}\""));
@@ -111,6 +113,7 @@ public class Parser
                     Description = $"Недопустимый символ \"{token.WordCurrent}\". Ожидался {expectedDesc}"
                 });
 
+                
                 bool isNoise = index + 1 < significant.Count &&
                                (significant[index + 1].TokenCurrent == Token.Unknown ||
                                 significant[index + 1].TokenCurrent == Token.UnknownNoConst ||
@@ -118,15 +121,16 @@ public class Parser
 
                 if (!isNoise)
                 {
-                    if (expectedSet.Count == 1)
+                    
+                    if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
+                    {
+                        state = State.AfterId;
+                    }
+                    else if (expectedSet.Count == 1)
                     {
                         Token recoveryToken = expectedSet.First();
                         if (Transitions[state].TryGetValue(recoveryToken, out var nextState))
                             state = nextState;
-                    }
-                    else if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
-                    {
-                        state = State.AfterId;
                     }
                 }
 
@@ -135,6 +139,7 @@ public class Parser
                 continue;
             }
 
+            
             string? insertedDescription = TryInsertSingleToken(state, token.TokenCurrent, dictionary);
             if (insertedDescription != null)
             {
@@ -152,6 +157,7 @@ public class Parser
                 continue;
             }
 
+            
             string errExpectedDesc = string.Join(" или ", expectedSet.Select(t => $"\"{dictionary.GetDescription(t) ?? t.ToString()}\""));
             errors.Add(new ParserError
             {
@@ -163,6 +169,7 @@ public class Parser
             index++;
         }
 
+        
         while (state != State.Start && significant.Count > 0)
         {
             var lastToken = significant.Last();
@@ -197,6 +204,7 @@ public class Parser
         {
             if (Transitions[state].TryGetValue(expectedTok, out var nextState))
             {
+                
                 if (ExpectedTokens[nextState].Any(t => AreTokensCompatible(t, actualToken)))
                     return dictionary.GetDescription(expectedTok) ?? expectedTok.ToString();
             }
