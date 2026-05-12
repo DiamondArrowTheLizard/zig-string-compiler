@@ -30,7 +30,7 @@ public class Parser
         [State.AfterConst] = new() { Token.Id },
         [State.AfterId] = new() { Token.Colon },
         [State.AfterColon] = new() { Token.BracesOpen },
-        [State.AfterOpenBracket] = new() { Token.BracesClose, Token.ConstU8 },
+        [State.AfterOpenBracket] = new() { Token.BracesClose },
         [State.AfterCloseBracket] = new() { Token.ConstU8 },
         [State.AfterSecondConst] = new() { Token.U8 },
         [State.AfterU8] = new() { Token.Equals, Token.Semicolon },
@@ -46,7 +46,7 @@ public class Parser
         [State.AfterConst] = new() { [Token.Id] = State.AfterId, [Token.Unknown] = State.AfterId },
         [State.AfterId] = new() { [Token.Colon] = State.AfterColon },
         [State.AfterColon] = new() { [Token.BracesOpen] = State.AfterOpenBracket },
-        [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket, [Token.ConstU8] = State.AfterSecondConst },
+        [State.AfterOpenBracket] = new() { [Token.BracesClose] = State.AfterCloseBracket },
         [State.AfterCloseBracket] = new() { [Token.ConstU8] = State.AfterSecondConst },
         [State.AfterSecondConst] = new() { [Token.U8] = State.AfterU8 },
         [State.AfterU8] = new()
@@ -111,8 +111,24 @@ public class Parser
                     Description = $"Недопустимый символ \"{token.WordCurrent}\". Ожидался {expectedDesc}"
                 });
 
-                if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
-                    state = State.AfterId;
+                bool isNoise = index + 1 < significant.Count &&
+                               (significant[index + 1].TokenCurrent == Token.Unknown ||
+                                significant[index + 1].TokenCurrent == Token.UnknownNoConst ||
+                                expectedSet.Any(t => AreTokensCompatible(t, significant[index + 1].TokenCurrent)));
+
+                if (!isNoise)
+                {
+                    if (expectedSet.Count == 1)
+                    {
+                        Token recoveryToken = expectedSet.First();
+                        if (Transitions[state].TryGetValue(recoveryToken, out var nextState))
+                            state = nextState;
+                    }
+                    else if (token.TokenCurrent == Token.UnknownNoConst && state == State.Start)
+                    {
+                        state = State.AfterId;
+                    }
+                }
 
                 lastExpected = expectedDesc;
                 index++;
