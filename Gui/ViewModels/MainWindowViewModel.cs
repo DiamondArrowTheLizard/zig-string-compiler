@@ -314,8 +314,19 @@ public partial class MainWindowViewModel : ObservableObject
         else
             window.Show();
     }
+
     [RelayCommand]
-    private void ShowSource() => ShowInfo("Исходный код программы", "...");
+    private void ShowSource()
+    {
+        var sourceWindow = new SourceCodeWindow();
+
+        var mainWindow = (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+        if (mainWindow != null)
+            sourceWindow.ShowDialog(mainWindow);
+        else
+            sourceWindow.Show();
+    }
 
     private void ShowInfo(string title, string message) =>
         _ = _dialogService.ShowMessageAsync(title, message);

@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ae="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+        x:Class="Gui.Views.SourceCodeWindow"
+        Title="Исходный код программы" 
+        Width="900" Height="700"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="ae|TextEditor">
+            <Setter Property="FontFamily" Value="Consolas, Menlo, Monospace"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="ShowLineNumbers" Value="True"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Visible"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto, *">
+        <Border Grid.Row="0" Background="{DynamicResource MaterialDesignPaper}" Padding="15">
+            <TextBlock Text="Архитектура компилятора" 
+                       FontSize="20" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"/>
+        </Border>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Lexer.cs">
+                <ae:TextEditor Name="LexerEditor" SyntaxHighlighting="C#"/>
+            </TabItem>
+            <TabItem Header="Parser.cs">
+                <ae:TextEditor Name="ParserEditor" SyntaxHighlighting="C#"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
