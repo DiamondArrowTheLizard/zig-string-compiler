@@ -17,12 +17,12 @@ csv.Build(lexer);
 csv.WriteToStream(Console.Out);
 
 Console.WriteLine();
-Console.WriteLine("--- Parser Results ---");
 
 
 var parser = new Parser();
 var result = parser.Parse(lexer.Nodes, lexer.Dictionary);
 
+Console.WriteLine("--- Parser Results ---");
 var csvP = new ParserCsv();
 csvP.Build(result);
 using var writerP = new StringWriter();
