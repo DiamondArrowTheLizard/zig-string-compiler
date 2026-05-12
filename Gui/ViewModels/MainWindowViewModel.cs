@@ -292,7 +292,17 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowTest() => ShowInfo("Тестовый пример", "...");
+    private void ShowTest()
+    {
+        var window = new TestWindow();
+        var mainWindow = (App.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+        if (mainWindow != null)
+            window.ShowDialog(mainWindow);
+        else
+            window.Show();
+    }
+
     [RelayCommand]
     private void ShowReferences() => ShowInfo("Список литературы", "...");
     [RelayCommand]

@@ -1,0 +1,113 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Gui.Views.TestWindow"
+        Title="Тестовые примеры" 
+        Width="800" Height="700" 
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="Border.code-box">
+            <Setter Property="Background" Value="#2c3e50"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0,10"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style Selector="TextBlock.code-text">
+            <Setter Property="FontFamily" Value="Consolas, Courier New"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+        </Style>
+        <Style Selector="Image">
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="ClipToBounds" Value="True"/>
+        </Style>
+    </Window.Styles>
+
+    <ScrollViewer>
+        <StackPanel Margin="25">
+            <TextBlock Text="Тестовые примеры" 
+                       FontSize="26" 
+                       FontWeight="Heavy" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,0,0,25"/>
+
+            <Border Classes="card">
+                <StackPanel>
+                    <TextBlock Text="Пример 1: Корректное объявление" Classes="h2"/>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="Статус:" FontWeight="Bold" Foreground="#27ae60"/>
+                        <TextBlock Text="Ошибок не обнаружено" Foreground="#27ae60"/>
+                    </StackPanel>
+                    <Border Classes="code-box">
+                        <TextBlock Text="const GREETING: []const u8 = &quot;Hello World!&quot;;" Classes="code-text"/>
+                    </Border>
+                    <Image Source="avares://Gui/Assets/example1.png"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel>
+                    <TextBlock Text="Пример 2: Синтаксическая ошибка" Classes="h2"/>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="Ошибка:" FontWeight="Bold" Foreground="#c0392b"/>
+                        <TextBlock Text="Ожидался оператор-конец массива" Foreground="#c0392b"/>
+                    </StackPanel>
+                    <Border Classes="code-box">
+                        <TextBlock Text="const GREETING: [const u8 = &quot;Hello World!&quot;;" Classes="code-text"/>
+                    </Border>
+                    <Image Source="avares://Gui/Assets/example2.png"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel>
+                    <TextBlock Text="Пример 3: Лексическая ошибка" Classes="h2"/>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="Ошибка:" FontWeight="Bold" Foreground="#c0392b"/>
+                        <TextBlock Text="Недопустимый символ в const" Foreground="#c0392b"/>
+                    </StackPanel>
+                    <Border Classes="code-box">
+                        <TextBlock Text="co@@@nst GREETING: []const u8 = &quot;Hello World!&quot;;" Classes="code-text"/>
+                    </Border>
+                    <Image Source="avares://Gui/Assets/example3.png"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel>
+                    <TextBlock Text="Пример 4: Множественные ошибки" Classes="h2"/>
+                    <TextBlock Text="Анализ сложного кода с нарушением структуры:" TextWrapping="Wrap" Opacity="0.8"/>
+                    <Border Classes="code-box" HorizontalAlignment="Stretch">
+                        <TextBlock Classes="code-text" xml:space="preserve">
+const GREETING: []const u#8 = &quot;Hello World!&quot;;
+const GREETING: []const u8 @@@@@ = &quot;Hello World!&quot;;
+const GREETING: []const = &quot;&quot;;
+                            </TextBlock>
+                    </Border>
+                    <Image Source="avares://Gui/Assets/example4.png"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="© 2026 Справочная документация приложения" 
+                       HorizontalAlignment="Center" 
+                       FontSize="11" 
+                       Opacity="0.5" 
+                       Margin="0,20,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
