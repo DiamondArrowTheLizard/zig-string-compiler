@@ -45,6 +45,9 @@ public partial class MainWindowViewModel : ObservableObject
     private SemanticResultsViewModel _semanticResults = new();
 
     [ObservableProperty]
+    private RegexSearchViewModel _regexSearch = new();
+
+    [ObservableProperty]
     private string _statusText = "Готов";
 
     public TextDocument Document { get; } = new();

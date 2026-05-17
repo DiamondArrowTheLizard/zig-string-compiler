@@ -135,6 +135,10 @@
                     <views:SemanticResultsView DataContext="{Binding SemanticResults}"/>
                 </TabItem>
 
+                <TabItem Header="Поиск (РВ)">
+                    <views:RegexSearchView x:Name="RegexSearchControl" DataContext="{Binding RegexSearch}"/>
+                </TabItem>
+
             </TabControl>
         </Grid>
 

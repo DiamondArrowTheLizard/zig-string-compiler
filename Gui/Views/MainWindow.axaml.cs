@@ -30,6 +30,12 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm)
         {
             vm.SetEditor(_editor);
+
+            var regexControl = this.FindControl<RegexSearchView>("RegexSearchControl");
+            if (regexControl != null)
+            {
+                regexControl.SetEditor(_editor);
+            }
         }
     }
 
