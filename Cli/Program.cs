@@ -38,7 +38,7 @@ if (result.Success)
     var semanticResult = semanticAnalyzer.Analyze(programAst);
 
     Console.WriteLine("--- AST Tree ---");
-    Console.WriteLine(programAst.ToJsonString());
+    Console.Write(programAst.ToTreeString());
     Console.WriteLine();
 
     Console.WriteLine("--- Semantic Results ---");

@@ -5,35 +5,22 @@ namespace Core.Ast;
 
 public abstract class AstNode
 {
-    public abstract string ToJsonString(int indentLevel = 0);
+    public abstract string ToTreeString(string indent = "", bool isLast = true);
 }
 
 public class ProgramNode : AstNode
 {
     public List<ConstDeclNode> Declarations { get; set; } = new();
 
-    public override string ToJsonString(int indentLevel = 0)
+    public override string ToTreeString(string indent = "", bool isLast = true)
     {
-        var indent = new string(' ', indentLevel * 2);
-        var nextIndent = new string(' ', (indentLevel + 1) * 2);
         var sb = new StringBuilder();
-        sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{nextIndent}\"Node\": \"ProgramNode\",");
-        sb.AppendLine($"{nextIndent}\"Declarations\": [");
+        sb.AppendLine("ProgramNode");
         for (int i = 0; i < Declarations.Count; i++)
         {
-            sb.Append(Declarations[i].ToJsonString(indentLevel + 2));
-            if (i < Declarations.Count - 1)
-            {
-                sb.AppendLine(",");
-            }
-            else
-            {
-                sb.AppendLine();
-            }
+            bool lastDecl = (i == Declarations.Count - 1);
+            sb.Append(Declarations[i].ToTreeString(indent, lastDecl));
         }
-        sb.AppendLine($"{nextIndent}]");
-        sb.Append($"{indent}}}");
         return sb.ToString();
     }
 }
@@ -46,18 +33,26 @@ public class ConstDeclNode : AstNode
     public uint Line { get; set; }
     public uint Position { get; set; }
 
-    public override string ToJsonString(int indentLevel = 0)
+    public override string ToTreeString(string indent = "", bool isLast = true)
     {
-        var indent = new string(' ', indentLevel * 2);
-        var nextIndent = new string(' ', (indentLevel + 1) * 2);
         var sb = new StringBuilder();
-        sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{nextIndent}\"Node\": \"ConstDeclNode\",");
-        sb.AppendLine($"{nextIndent}\"Name\": \"{Name}\",");
-        sb.AppendLine($"{nextIndent}\"Type\": \"{Type}\",");
-        sb.Append($"{nextIndent}\"Value\": \"{Value ?? "null"}\"");
-        sb.AppendLine();
-        sb.Append($"{indent}}}");
+        var marker = isLast ? "└── " : "├── ";
+        sb.AppendLine($"{indent}{marker}ConstDeclNode");
+
+        var childIndent = indent + (isLast ? "    " : "│   ");
+
+        if (Value != null)
+        {
+            sb.AppendLine($"{childIndent}├── name: \"{Name}\"");
+            sb.AppendLine($"{childIndent}├── type: \"{Type}\"");
+            sb.AppendLine($"{childIndent}└── value: \"{Value}\"");
+        }
+        else
+        {
+            sb.AppendLine($"{childIndent}├── name: \"{Name}\"");
+            sb.AppendLine($"{childIndent}└── type: \"{Type}\"");
+        }
+
         return sb.ToString();
     }
 }
