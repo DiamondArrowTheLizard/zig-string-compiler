@@ -43,6 +43,7 @@ public partial class App : Application
         services.AddTransient<AboutViewModel>();
         services.AddTransient<ParserResultsViewModel>();
         services.AddTransient<LexerResultsViewModel>();
+        services.AddTransient<SemanticResultsViewModel>();
 
         services.AddTransient<MainWindow>(provider => new MainWindow
         {

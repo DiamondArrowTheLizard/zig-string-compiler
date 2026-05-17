@@ -120,14 +120,21 @@
             <GridSplitter Grid.Row="1" Height="4" Background="Gray" HorizontalAlignment="Stretch"/>
 
             <TabControl Grid.Row="2">
+
                 <TabItem Header="Лексер">
                     <views:LexerResultsView DataContext="{Binding LexerResults}"
                                             NavigateTo="OnLexerNavigate"/>
                 </TabItem>
+
                 <TabItem Header="Парсер">
                     <views:ParserResultsView DataContext="{Binding ParserResults}"
                                              NavigateTo="OnParserNavigate"/>
                 </TabItem>
+
+                <TabItem Header="Семантика и AST">
+                    <views:SemanticResultsView DataContext="{Binding SemanticResults}"/>
+                </TabItem>
+
             </TabControl>
         </Grid>
 

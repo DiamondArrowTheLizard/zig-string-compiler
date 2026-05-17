@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Gui.ViewModels"
+             x:Class="Gui.Views.SemanticResultsView"
+             x:DataType="vm:SemanticResultsViewModel">
+    
+    <Grid RowDefinitions="250,*">
+        <GroupBox Header="Абстрактное синтаксическое дерево (AST)" Grid.Row="0" Margin="5">
+            <TextBox Text="{Binding AstTreeText}"
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     FontFamily="Courier New,Cascadia Code,Monospace"
+                     FontSize="14"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+        </GroupBox>
+
+        <GroupBox Header="Семантические ошибки" Grid.Row="1" Margin="5">
+            <DataGrid ItemsSource="{Binding Errors}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="All"
+                      BorderThickness="1"
+                      BorderBrush="Gray">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Местоположение" Binding="{Binding Location}" Width="200"/>
+                    <DataGridTextColumn Header="Описание семантической ошибки" Binding="{Binding Description}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+    </Grid>
+</UserControl>

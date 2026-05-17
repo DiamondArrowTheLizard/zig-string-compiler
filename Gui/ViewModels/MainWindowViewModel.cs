@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Core.Lexer;
 using Core.Parser;
+using Core.Ast;
 using Gui.Models;
 using Gui.Services;
 using Gui.Views;
@@ -14,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Semantic;
 
 namespace Gui.ViewModels;
 
@@ -35,8 +37,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private LexerResultsViewModel _lexerResults = new();
+
     [ObservableProperty]
     private ParserResultsViewModel _parserResults = new();
+
+    [ObservableProperty]
+    private SemanticResultsViewModel _semanticResults = new();
 
     [ObservableProperty]
     private string _statusText = "Готов";
@@ -223,6 +229,37 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         StatusText = $"Токены: {allTokens.Count}, Лексические ошибки: {errorTokens.Count}, Ошибок парсера: {ParserResults.Items.Count}";
+
+        if (result.Success)
+        {
+            var astBuilder = new AstBuilder();
+            var programAst = astBuilder.Build(lexer.Nodes);
+
+            var semanticAnalyzer = new SemanticAnalyzer();
+            var semanticResult = semanticAnalyzer.Analyze(programAst);
+
+            SemanticResults.AstTreeText = programAst.ToTreeString();
+
+            SemanticResults.Errors.Clear();
+            foreach (var error in semanticResult.Errors)
+            {
+                SemanticResults.Errors.Add(new SemanticErrorInfo(error.Location, error.Description));
+            }
+
+            if (semanticResult.Success)
+            {
+                StatusText = "Анализ успешно завершен. Ошибок нет.";
+            }
+            else
+            {
+                StatusText = $"Обнаружены семантические ошибки ({semanticResult.Errors.Count}).";
+            }
+        }
+        else
+        {
+            SemanticResults.AstTreeText = "Ошибка синтаксического анализа. Дерево AST не может быть построено.";
+            SemanticResults.Errors.Clear();
+        }
     }
 
     [RelayCommand]
