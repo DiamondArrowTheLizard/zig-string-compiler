@@ -164,3 +164,73 @@ V_N = {START, CONST, ID, COLON, BRACES_OPEN, BRACES_CLOSE, CONST_AFTER_BRACES, U
 ![P1](Assets/p1.png)
 ![P2](Assets/p2.png)
 ![P3](Assets/p3.png)
+
+
+
+# Лабораторная работа 5. Построение AST и проверка контекстно-зависимых условий
+
+
+## Цель работы
+
+### Изучить назначение и принципы работы семантического анализатора в структуре компилятора. Освоить методы построения абстрактного синтаксического дерева (AST) и проверки контекстно-зависимых условий (семантических правил) для заданной синтаксической конструкции.
+
+
+## Вариант задания
+
+### Вариант 65 - Объявление строковой константы на языке Zig
+```
+const GREETING: []const u8 = "Hello World";
+```
+
+## Контекстно-зависимые условия
+
+### Реализованные проверки
+
+- Уникальность имён
+```
+const GREETING: []const u8 = "Hello World";
+const GREETING: []const u8 = "Hello World"; - Выведет ошибку Семантическая ошибка: Переобъявление идентификатора 'GREETING'
+```
+- Использование объявленных идентификаторов
+```
+const GREETING1: []const u8 = "Hello World";
+const GREETING2: []const u8; - Выведет ошибку Семантическая ошибка: Константа 'GREETING2' должна быть инициализирована
+```
+
+
+## Структура AST
+
+### Типы узлов
+
+- ProgramNode - корневой узел
+- ConstDeclNode - узел объявления константной строки
+
+### Рисунок AST
+![AST](Assets/Ast.png)
+
+### Формат вывода в программе
+
+```
+const GREETING1: []const u8 = "Hello World";
+ProgramNode
+└── ConstDeclNode
+    ├── name: "GREETING"
+    ├── type: "[]const u8"
+    └── value: "Hello, World"
+```
+
+
+## Тестовый пример
+
+![AstExample](Assets/AstExample.png)
+
+
+## Инструкция по сборке и запуску
+
+### Зависимости: .NET 10
+### Сборка проекта:
+```
+dotnet publish -c Release -r [OS] --self-contained true
+# OS: win-x64, linux-x64
+```
+Исполняемый файл генерируется в Gui/bin/Release/[OS]/publish/
