@@ -1,8 +1,9 @@
 ﻿using Core.Lexer;
 using Core.Parser;
+using Core.Ast;
+using Core.Semantic;
 using System;
 using System.IO;
-using System.Linq;
 
 string? line;
 var lexer = new Lexer();
@@ -18,7 +19,6 @@ csv.WriteToStream(Console.Out);
 
 Console.WriteLine();
 
-
 var parser = new Parser();
 var result = parser.Parse(lexer.Nodes, lexer.Dictionary);
 
@@ -28,3 +28,29 @@ csvP.Build(result);
 using var writerP = new StringWriter();
 csvP.WriteToStream(writerP);
 Console.WriteLine(writerP.ToString());
+
+if (result.Success)
+{
+    var astBuilder = new AstBuilder();
+    var programAst = astBuilder.Build(lexer.Nodes);
+
+    var semanticAnalyzer = new SemanticAnalyzer();
+    var semanticResult = semanticAnalyzer.Analyze(programAst);
+
+    Console.WriteLine("--- AST Tree ---");
+    Console.WriteLine(programAst.ToJsonString());
+    Console.WriteLine();
+
+    Console.WriteLine("--- Semantic Results ---");
+    if (semanticResult.Success)
+    {
+        Console.WriteLine("Семантический анализ завершен успешно. Ошибок не обнаружено.");
+    }
+    else
+    {
+        foreach (var error in semanticResult.Errors)
+        {
+            Console.WriteLine($"{error.Location}: {error.Description}");
+        }
+    }
+}
