@@ -48,6 +48,9 @@ public partial class MainWindowViewModel : ObservableObject
     private RegexSearchViewModel _regexSearch = new();
 
     [ObservableProperty]
+    private IrOptimizationViewModel _irOptimization = new();
+
+    [ObservableProperty]
     private string _statusText = "Готов";
 
     public TextDocument Document { get; } = new();
@@ -252,6 +255,14 @@ public partial class MainWindowViewModel : ObservableObject
             if (semanticResult.Success)
             {
                 StatusText = "Анализ успешно завершен. Ошибок нет.";
+
+                var irGenerator = new Core.Ir.IrGenerator();
+                var initialIr = irGenerator.Generate(programAst.Declarations);
+                IrOptimization.InputIrText = string.Join(System.Environment.NewLine, initialIr);
+
+                var irOptimizer = new Core.Ir.IrOptimizer();
+                var optimizedIr = irOptimizer.Optimize(initialIr);
+                IrOptimization.OptimizedIrText = string.Join(System.Environment.NewLine, optimizedIr);
             }
             else
             {

@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Gui.ViewModels"
+             x:Class="Gui.Views.IrOptimizationView"
+             x:DataType="vm:IrOptimizationViewModel">
+
+    <Grid ColumnDefinitions="*,4,*">
+        
+        <DockPanel Grid.Column="0">
+            <TextBlock Text="Входной IR" FontWeight="Bold" DockPanel.Dock="Top" Margin="5"/>
+            <TextBox Text="{Binding InputIrText}" 
+                     AcceptsReturn="True" 
+                     IsReadOnly="True" 
+                     FontFamily="Consolas" 
+                     Margin="5"/>
+        </DockPanel>
+
+        <GridSplitter Grid.Column="1" Background="Gray" ResizeDirection="Columns"/>
+
+        <DockPanel Grid.Column="2">
+            <TextBlock Text="Оптимизированный IR" FontWeight="Bold" DockPanel.Dock="Top" Margin="5"/>
+            <TextBox Text="{Binding OptimizedIrText}" 
+                     AcceptsReturn="True" 
+                     IsReadOnly="True" 
+                     FontFamily="Consolas" 
+                     Margin="5"/>
+        </DockPanel>
+
+    </Grid>
+</UserControl>

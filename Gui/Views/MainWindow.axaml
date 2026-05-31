@@ -136,7 +136,11 @@
                 </TabItem>
 
                 <TabItem Header="Поиск (РВ)">
-                    <views:RegexSearchView x:Name="RegexSearchControl" DataContext="{Binding RegexSearch}"/>
+                    <views:RegexSearchView x:Name="RegexSearchControl" DataContext="{Binding RegexSearch}"/> 
+                </TabItem>
+
+                <TabItem Header="Генерация и Оптимизация IR"> 
+                    <views:IrOptimizationView DataContext="{Binding IrOptimization}"/> 
                 </TabItem>
 
             </TabControl>

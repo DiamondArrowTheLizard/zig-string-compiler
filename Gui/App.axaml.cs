@@ -45,6 +45,9 @@ public partial class App : Application
         services.AddTransient<LexerResultsViewModel>();
         services.AddTransient<SemanticResultsViewModel>();
         services.AddTransient<RegexSearchViewModel>();
+        services.AddTransient<SemanticResultsViewModel>();
+        services.AddTransient<RegexSearchViewModel>();
+        services.AddTransient<IrOptimizationViewModel>();
 
         services.AddTransient<MainWindow>(provider => new MainWindow
         {
